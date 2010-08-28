@@ -2,7 +2,11 @@
 
 extern ExceptionManager exc;
 
-Exception_Define(excInvalidDepth);
+size_t Modules_Method;
+
+void Method0(void) {
+	Modules_Method = Module_Register(String("Method"));
+}
 
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
@@ -47,7 +51,7 @@ inline def(void, Indent) {
 
 inline def(void, Unindent) {
 	if (this->indent == 0) {
-		throw(&exc, &excInvalidDepth);
+		throw(&exc, excInvalidDepth);
 	}
 
 	this->indent--;

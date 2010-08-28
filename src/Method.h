@@ -3,10 +3,12 @@
 #import <LinkedList.h>
 #import <DoublyLinkedList.h>
 
+#import "Errors.h"
+
 #undef self
 #define self Method
 
-Exception_Export(excInvalidDepth);
+extern size_t Modules_Method;
 
 typedef struct ref(LineItem) {
 	String line;

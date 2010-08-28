@@ -23,6 +23,8 @@ int main(int argc, char **argv) {
 	Memory0(&exc);
 	Directory0(&exc);
 
+	Application0();
+
 	Logger_Init(&logger, &OnLogMessage, NULL,
 		Logger_Level_Fatal |
 		Logger_Level_Crit  |

@@ -3,8 +3,11 @@
 extern Logger logger;
 extern ExceptionManager exc;
 
-Exception_Define(excParsingFailed);
-Exception_Define(excInvalidParameter);
+size_t Modules_Application;
+
+void Application0(void) {
+	Modules_Application = Module_Register(String("Application"));
+}
 
 def(void, Init) {
 	this->itf  = true;
@@ -181,7 +184,7 @@ static void ref(HandleFor)(Method *method, String params) {
 		Logger_Log(&logger, Logger_Level_Error,
 			String("Incomplete for-loop."));
 
-		throw(&exc, &excParsingFailed);
+		throw(&exc, excParsingFailed);
 	}
 
 	String iter   = ref(FormatVariables)(parts->buf[0]);
@@ -193,7 +196,7 @@ static void ref(HandleFor)(Method *method, String params) {
 			String("For loops don't support '%'"),
 			option);
 
-		throw(&exc, &excParsingFailed);
+		throw(&exc, excParsingFailed);
 	}
 
 	ssize_t pos = String_Find(from, 0, String(".."));
@@ -297,7 +300,7 @@ static void ref(HandleCommand)(Method *method, String s) {
 			Logger_LogFmt(&logger, Logger_Level_Error,
 				String("Command '%' is unknown."), cmd);
 
-			throw(&exc, &excParsingFailed);
+			throw(&exc, excParsingFailed);
 		}
 	}
 }
@@ -460,7 +463,7 @@ static def(void, ParseTemplate, StreamInterface *stream, void *context, bool inB
 							Logger_Log(&logger, Logger_Level_Error,
 								String("Only 'end' tags within blocks are allowed."));
 
-							throw(&exc, &excParsingFailed);
+							throw(&exc, excParsingFailed);
 						}
 					}
 
@@ -554,7 +557,7 @@ def(void, Process) {
 		Logger_Log(&logger, Logger_Level_Error,
 			String("No output path is set."));
 
-		throw(&exc, &excInvalidParameter);
+		throw(&exc, excInvalidParameter);
 	}
 
 	if (this->dir.len > 0) {

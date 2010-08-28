@@ -6,14 +6,14 @@
 #import <Directory.h>
 #import <StreamInterface.h>
 
+#import "Errors.h"
 #import "Method.h"
 #import "Output.h"
 
 #undef self
 #define self Application
 
-Exception_Export(excParsingFailed);
-Exception_Export(excInvalidParameter);
+extern size_t Modules_Application;
 
 typedef struct {
 	String name;
@@ -31,6 +31,8 @@ typedef struct {
 
 	Array(ref(TemplateItem), *files);
 } self;
+
+void Application0(void);
 
 def(void, Init);
 def(void, Destroy);
