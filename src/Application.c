@@ -143,10 +143,21 @@ static void ref(HandleIfEmpty)(Method *method, String s) {
 	String_Destroy(&var);
 }
 
-static void ref(HandleElse)(Method *method) {
-	Method_Unindent(method);
-	Method_AddLine(method, String("} else {"));
-	Method_Indent(method);
+static void ref(HandleElse)(Method *method, String s) {
+	if (s.len == 0) {
+		Method_Unindent(method);
+		Method_AddLine(method, String("} else {"));
+		Method_Indent(method);
+	} else {
+		String var  = ref(FormatVariables)(s);
+		String line = String_Format(String("} else if (%) {"), var);
+
+		Method_AddLine(method, line);
+		Method_Indent(method);
+
+		String_Destroy(&line);
+		String_Destroy(&var);
+	}
 }
 
 static void ref(HandleEnd)(Method *method) {
@@ -285,7 +296,7 @@ static void ref(HandleCommand)(Method *method, String s) {
 		} else if (String_Equals(cmd, String("empty"))) {
 			ref(HandleIfEmpty)(method, params);
 		} else if (String_Equals(cmd, String("else"))) {
-			ref(HandleElse)(method);
+			ref(HandleElse)(method, params);
 		} else if (String_Equals(cmd, String("end"))) {
 			ref(HandleEnd)(method);
 		} else if (String_Equals(cmd, String("block"))) {
