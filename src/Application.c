@@ -252,25 +252,37 @@ static void ref(HandleFor)(Method *method, String params) {
 }
 
 static void ref(HandlePass)(Method *method, String params) {
-	StringArray *parts = String_Split(params, ' ');
+	String fmt;
+	ssize_t pos = String_Find(params, ' ');
 
-	String var = ref(FormatVariables)(parts->buf[1]);
+	if (pos == String_NotFound) {
+		fmt = String_Format(String(
+			"{ "
+				"String tmp = %(); "
+				"String_Append(res, tmp); "
+				"String_Destroy(&tmp); "
+			"}"),
 
-	String fmt = String_Format(String(
-		"{ "
-			"String tmp = %(%); "
-			"String_Append(res, tmp); "
-			"String_Destroy(&tmp); "
-		"}"),
+			params);
+	} else {
+		String var = ref(FormatVariables)(String_Slice(params, pos + 1));
 
-		parts->buf[0], var);
+		fmt = String_Format(String(
+			"{ "
+				"String tmp = %(%); "
+				"String_Append(res, tmp); "
+				"String_Destroy(&tmp); "
+			"}"),
+
+			String_Slice(params, 0, pos),
+			var);
+
+		String_Destroy(&var);
+	}
 
 	Method_AddLine(method, fmt);
 
 	String_Destroy(&fmt);
-	String_Destroy(&var);
-
-	Array_Destroy(parts);
 }
 
 static void ref(HandleCommand)(Method *method, String s) {
