@@ -144,8 +144,9 @@ static void ref(HandleIfEmpty)(Method *method, String s) {
 }
 
 static void ref(HandleElse)(Method *method, String s) {
+	Method_Unindent(method);
+
 	if (s.len == 0) {
-		Method_Unindent(method);
 		Method_AddLine(method, String("} else {"));
 		Method_Indent(method);
 	} else {
