@@ -285,46 +285,32 @@ static void ref(HandlePass)(Method *method, String params) {
 	String_Destroy(&fmt);
 }
 
-static void ref(HandleCommand)(Method *method, String s) {
-	if (s.buf[0] == '$' || s.buf[0] == '#') {
-		ref(HandlePrintVariable)(method, s, false);
+static void ref(HandleCommand)(Method *method, String name, String params) {
+	if (name.buf[0] == '$' || name.buf[0] == '#') {
+		ref(HandlePrintVariable)(method, name, false);
+	} else if (String_Equals(name, String("for"))) {
+		ref(HandleFor)(method, params);
+	} else if (String_Equals(name, String("if"))) {
+		ref(HandleIf)(method, params);
+	} else if (String_Equals(name, String("empty"))) {
+		ref(HandleIfEmpty)(method, params);
+	} else if (String_Equals(name, String("else"))) {
+		ref(HandleElse)(method, params);
+	} else if (String_Equals(name, String("end"))) {
+		ref(HandleEnd)(method);
+	} else if (String_Equals(name, String("block"))) {
+		ref(HandleBlock)(method, params);
+	} else if (String_Equals(name, String("int"))) {
+		ref(HandlePrintVariable)(method, params, true);
+	} else if (String_Equals(name, String("tpl"))) {
+		ref(HandleTemplate)(method, params);
+	} else if (String_Equals(name, String("pass"))) {
+		ref(HandlePass)(method, params);
 	} else {
-		ssize_t pos = String_Find(s, ' ');
+		Logger_LogFmt(&logger, Logger_Level_Error,
+			String("Command '%' is unknown."), name);
 
-		String cmd, params;
-
-		if (pos != String_NotFound) {
-			cmd    = String_Slice(s, 0, pos);
-			params = String_Slice(s, pos + 1);
-		} else {
-			cmd    = String_Slice(s, 0);
-			params = String("");
-		}
-
-		if (String_Equals(cmd, String("for"))) {
-			ref(HandleFor)(method, params);
-		} else if (String_Equals(cmd, String("if"))) {
-			ref(HandleIf)(method, params);
-		} else if (String_Equals(cmd, String("empty"))) {
-			ref(HandleIfEmpty)(method, params);
-		} else if (String_Equals(cmd, String("else"))) {
-			ref(HandleElse)(method, params);
-		} else if (String_Equals(cmd, String("end"))) {
-			ref(HandleEnd)(method);
-		} else if (String_Equals(cmd, String("block"))) {
-			ref(HandleBlock)(method, params);
-		} else if (String_Equals(cmd, String("int"))) {
-			ref(HandlePrintVariable)(method, params, true);
-		} else if (String_Equals(cmd, String("tpl"))) {
-			ref(HandleTemplate)(method, params);
-		} else if (String_Equals(cmd, String("pass"))) {
-			ref(HandlePass)(method, params);
-		} else {
-			Logger_LogFmt(&logger, Logger_Level_Error,
-				String("Command '%' is unknown."), cmd);
-
-			throw(&exc, excParsingFailed);
-		}
+		throw(&exc, excParsingFailed);
 	}
 }
 
@@ -412,101 +398,94 @@ static def(Method *, NewBlockMethod, String name, String params) {
 	return method;
 }
 
-static def(void, ParseTemplate, StreamInterface *stream, void *context, bool inBlock, Method *method) {
-	String blkbuf = HeapString(256);
-	String cmdbuf = HeapString(512);
-	String txtbuf = HeapString(4096);
+static bool ref(StartsCommandBlock)(String cmd) {
+	return String_Equals(cmd, String("if"))
+		|| String_Equals(cmd, String("for"))
+		|| String_Equals(cmd, String("else"))
+		|| String_Equals(cmd, String("empty"));
+}
 
-	char cur  = '\0';
-	char prev = '\0';
+static bool ref(EndsCommandBlock)(String cmd) {
+	return String_Equals(cmd, String("end"))
+		|| String_Equals(cmd, String("else"));
+}
 
-	enum state_t { NONE, COMMAND, BLOCK };
-	enum state_t state = NONE;
+static def(void, ParseTemplate, Parser *parser, bool inBlock, Method *method) {
+	Parser_Token prev = Parser_Token();
+	Parser_Token cur  = Parser_Token();
+	Parser_Token next = Parser_Token();
 
-	while (!stream->isEof(context)) {
-		stream->read(context, &cur, 1);
+	bool first = inBlock;
 
-		switch (state) {
-			case NONE:
-				if (cur == '{' || cur == '[' && prev != '\\') {
-					ref(FlushBuf)(method, txtbuf);
-					txtbuf.len = 0;
+	do {
+		if (cur.state == Parser_State_Text) {
+			String text = cur.u.text;
 
-					state = (cur == '[')
-						? BLOCK
-						: COMMAND;
-				} else {
-					String_Append(&txtbuf, cur);
-				}
+			if ((prev.state == Parser_State_Command && ref(StartsCommandBlock)(prev.u.cmd.name))
+			  || first)
+			{
+				text  = String_Trim(text, String_TrimLeft);
+				first = false;
+			}
 
-				break;
+			next = Parser_Fetch(parser);
 
-			case BLOCK:
-				if (cur == ']') {
-					if (inBlock) {
-						if (String_Equals(String("end"), blkbuf)) {
-							goto out;
-						} else {
-							Logger_Log(&logger, Logger_Level_Error,
-								String("Only 'end' tags within blocks are allowed."));
+			if ((next.state == Parser_State_Command && ref(EndsCommandBlock)(next.u.cmd.name))
+			  || next.state == Parser_State_Block)
+			{
+				text = String_Trim(text, String_TrimRight);
+			}
 
-							throw(&exc, excParsingFailed);
-						}
+			ref(FlushBuf)(method, text);
+		} else {
+			if (cur.state == Parser_State_Command) {
+				ref(HandleCommand)(method,
+					cur.u.cmd.name,
+					cur.u.cmd.params);
+			} else if (cur.state == Parser_State_Block) {
+				if (inBlock) {
+					if (String_Equals(cur.u.block, String("end"))) {
+						goto out;
 					}
 
-					ssize_t pos = String_Find(blkbuf, String(": "));
+					Logger_LogFmt(&logger, Logger_Level_Error,
+						String("'%' not understood."),
+						cur.u.block);
 
-					String blkname;
-					String blkparams;
-
-					if (pos == String_NotFound) {
-						blkname   = blkbuf;
-						blkparams = String("");
-					} else {
-						blkname = String_Slice(blkbuf, 0, pos);
-
-						blkparams = ref(FormatVariables)(
-							String_Slice(blkbuf, pos + 2));
-					}
-
-					ref(ParseTemplate)(this, stream, context, true,
-						ref(NewBlockMethod)(this, blkname, blkparams));
-
-					String_Destroy(&blkparams);
-
-					blkbuf.len = 0;
-
-					state = NONE;
-				} else {
-					String_Append(&blkbuf, cur);
+					throw(&exc, excParsingFailed);
 				}
 
-				break;
+				ssize_t pos = String_Find(cur.u.block, String(": "));
 
-			case COMMAND:
-				if (cur == '}') {
-					ref(HandleCommand)(method, cmdbuf);
-					cmdbuf.len = 0;
+				String blkname   = cur.u.block;
+				String blkparams = String("");
 
-					state = NONE;
-				} else {
-					String_Append(&cmdbuf, cur);
+				if (pos != String_NotFound) {
+					blkname   = String_Slice(cur.u.block, 0, pos);
+					blkparams = String_Slice(cur.u.block, pos + 2);
+					blkparams = ref(FormatVariables)(blkparams);
 				}
 
-				break;
+				ref(ParseTemplate)(this, parser, true,
+					ref(NewBlockMethod)(this, blkname, blkparams));
+
+				String_Destroy(&blkparams);
+			}
+
+			next = Parser_Fetch(parser);
 		}
 
+		Parser_DestroyToken(&prev);
+
 		prev = cur;
-	}
+		cur  = next;
+	} while (cur.state != Parser_State_None);
+
+	Parser_DestroyToken(&next);
 
 out:
-	if (txtbuf.len > 0) {
-		ref(FlushBuf)(method, txtbuf);
-	}
-
-	String_Destroy(&txtbuf);
-	String_Destroy(&cmdbuf);
-	String_Destroy(&blkbuf);
+	Parser_DestroyToken(&prev);
+	Parser_DestroyToken(&cur);
 }
 
 def(void, Scan) {
@@ -568,7 +547,10 @@ def(void, Process) {
 		BufferedStream_Init(&stream, &FileStream_Methods, &tplFile);
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);
 
-		ref(ParseTemplate)(this, &BufferedStream_Methods, &stream, false,
+		Parser parser;
+		Parser_Init(&parser, &BufferedStream_Methods, &stream);
+
+		ref(ParseTemplate)(this, &parser, false,
 			ref(NewMethod)(this, this->files->buf[i].name));
 
 		BufferedStream_Close(&stream);

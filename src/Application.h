@@ -9,6 +9,7 @@
 #import "Errors.h"
 #import "Method.h"
 #import "Output.h"
+#import "Parser.h"
 
 #undef self
 #define self Application
