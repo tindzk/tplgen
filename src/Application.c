@@ -343,78 +343,42 @@ static String ref(EscapeLine)(String s) {
 }
 
 static void ref(FlushBuf)(Method *method, String s) {
-	size_t pos = 0;
 	bool flushed = false;
 
-	for (size_t i = 0; i < s.len; i++) {
-		if (s.buf[i] == '\n' || i == s.len - 1) {
-			if (pos == 0 || i - pos != 0) {
-				String orig;
+	StringArray *items = String_Split(s, '\n');
 
-				if (i != s.len - 1) {
-					orig = String_Slice(s, pos, i - pos);
-				} else {
-					orig = String_Slice(s, pos);
-				}
+	for (size_t i = 0; i < items->len; i++) {
+		String line = items->buf[i];
 
-				String trimmed = String_Trim(orig);
-
-				String line;
-
-				if (Char_IsSpace(orig.buf[0])) { /* Pad the beginning */
-					String tmp = HeapString(trimmed.len + 1);
-
-					/* TODO Make output non-HTML friendly. */
-					if (orig.buf[0] != '\n') {
-						String_Append(&tmp, orig.buf[0]);
-					}
-
-					String_Append(&tmp, trimmed);
-
-					line = tmp;
-				} else {
-					line = String_Clone(trimmed);
-				}
-
-				if (i > 1 && s.buf[i] == '\n' && s.buf[i - 1] != '\n') {
-					String_Append(&line, String("\\n"));
-				} else if (s.buf[i] == ' ') {
-					String_Append(&line, ' ');
-				} else if (s.buf[pos] == ' ') {
-					String_Prepend(&line, String(" "));
-				}
-
-				if (line.len > 0) {
-					if (!flushed) {
-						Method_AddLine(method, String("String_Append(res, String("));
-						Method_Indent(method);
-						flushed = true;
-					}
-
-					String escaped = ref(EscapeLine)(line);
-
-					String tmp = StackString(escaped.len + 3);
-					String_Append(&tmp, '"');
-					String_Append(&tmp, escaped);
-					String_Append(&tmp, '"');
-
-					Method_AddLine(method, tmp);
-
-					String_Destroy(&escaped);
-				}
-
-			out:
-				String_Destroy(&line);
-			}
-
-			pos = i;
+		if (!flushed) {
+			Method_AddLine(method, String("String_Append(res, String("));
+			Method_Indent(method);
+			flushed = true;
 		}
+
+		String escaped = ref(EscapeLine)(line);
+
+		String_Prepend(&escaped, '"');
+
+		if (items->len > 1) {
+			if (i + 1 != items->len) {
+				String_Append(&escaped, String("\\n"));
+			}
+		}
+
+		String_Append(&escaped, '"');
+
+		Method_AddLine(method, escaped);
+
+		String_Destroy(&escaped);
 	}
 
 	if (flushed) {
 		Method_Unindent(method);
 		Method_AddLine(method, String("));"));
 	}
+
+	Array_Destroy(items);
 }
 
 static def(Method *, NewMethod, String name) {
