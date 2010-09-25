@@ -495,8 +495,8 @@ def(void, Scan) {
 	Directory_Init(&dir, this->dir);
 
 	while (Directory_Read(&dir, &item)) {
-		if (item.type != DT_LNK
-		 && item.type != DT_REG) {
+		if (item.type != Directory_ItemType_Symlink
+		 && item.type != Directory_ItemType_Regular) {
 			continue;
 		}
 
