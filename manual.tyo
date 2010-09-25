@@ -1,0 +1,172 @@
+.meta {
+	.title{tplgen: template generator}
+}
+
+.chapter[Introduction] {
+	.i{tplgen} is a lightweight template system. It can be used to
+	create interactive websites written in C.
+
+	tplgen doesn't require complex configuration. All options are
+	passed via command line parameters.
+
+	Templates are written in a simple markup. tplgen compiles them
+	to valid C code.
+
+	Templates can contain variables, loops, comparisons and even
+	sub-routines. It's also possible to nest templates and
+	to call any function which are defined somewhere else in the code.
+}
+
+.chapter[Installation] {
+	First make sure you have
+	.url[Jivai]{http://tindzk.github.com/Jivai/} and
+	.url[Jivai-Utils]{http://tindzk.github.com/Jivai-Utils/}
+	installed. Then, execute:
+
+	.command {
+		git clone git://github.com/tindzk/tplgen.git
+		cd tplgen; ./build.sh
+	}
+}
+
+.chapter[Generation] {
+	By default, tplgen will implement a generic interface. This is
+	useful for maintaining multiple themes or output formats.
+	The interface is a structure called .keyword{TemplateInterface}
+	only containing function pointers. It may look like:
+
+	.code {
+		typedef struct \{
+			void (*main)   (MainTemplate    *, String *);
+			void (*article)(ArticleTemplate *, String *);
+			void (*listing)(ListingTemplate *, String *);
+		\} TemplateInterface;
+	}
+
+	You also need to declare a structure for each template which
+	contains its global members.
+
+	Assumed you want to create a template for the default theme,
+	you have to call tplgen like this:
+
+	.command {
+		../tplgen/tplgen.bin                     \
+			name=Default                         \
+			add=Main:tpl/Default/Main.html       \
+			add=Article:tpl/Default/Article.html \
+			add=Listing:tpl/Default/Listing.html \
+			out=src/Templates/Default.c
+	}
+
+	If you ensure that each theme directory contains the same file
+	names, you can shorten the command to:
+
+	.command {
+		../tplgen/tplgen.bin \
+			name=Default     \
+			dir=tpl/Default  \
+			ext=.html        \
+			out=src/Templates/Default.c
+	}
+
+	.warning {
+		This command will include all .path{.html} files in
+		.path{tpl/Default}. Temporarily created files should be
+		moved into a subdirectory, otherwise tplgen tries to
+		interpret them, too.
+	}
+
+	.section[Creating the Header] {
+		.p {
+			tplgen doesn't create any C header files. These
+			have to be created manually. .path{Default.c} will look
+			for a header file named .path{Default.h}.
+		}
+
+		.p {
+			Since you will probably have more than one template,
+			it's recommendable to put the template interface into a
+			separate file and include it from all templates. A
+			generic header file looks like:
+		}
+
+		.code {
+			#import <String.h>
+			#import "TemplateInterface.h"
+
+			TemplateInterface Templates_Default;
+		}
+
+		.note {
+			.func{main()}, .func{article()} and .func{listing()} are
+			defined for each template in the structure
+			.var{Template_<TemplateName>}, i.e.
+			.var{Templates_Default} in this case.
+		}
+	}
+
+	.section[Templates without Interface] {
+		.p {
+			If having an interface is not desired, you can specify the
+			parameter .keyword{itf=no}. This will lead to a slightly
+			different behaviour:
+		}
+
+		.list {
+			.item{TemplateInterface is .i{not} implemented.}
+			.item{All functions are .keyword{public}.}
+		}
+
+		.p {
+			Rather than accessing the template structure, you can
+			now access the functions directly.
+		}
+	}
+
+	.section[See also] {
+		Also see the .path{examples} directory for a simple
+		application which doesn't use interfaces.
+	}
+}
+
+.chapter[Performance] {
+	If the template's length is not predictable, you shouldn't
+	disable .keyword{String_SmartAlign}. Otherwise, the generation
+	will result in many slow reallocations of the output string.
+}
+
+.chapter[License] {
+	.p {
+		Licensed under the EUPL, Version 1.1 only (the
+		.i{"Licence"}); You may not use this work except in
+		compliance with the Licence.
+	}
+
+	.p {
+		You may obtain a copy of the Licence at:
+			.url{http://ec.europa.eu/idabc/eupl}
+	}
+
+	.p {
+		Unless required by applicable law or agreed to in writing,
+		software distributed under the Licence is distributed on an
+		"AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+		either express or implied.
+	}
+
+	.p {
+		See the Licence for the specific language governing
+		permissions and limitations under the Licence.
+	}
+}
+
+.chapter[See also] {
+	.list {
+		.item{.url[Browse source]{http://github.com/tindzk/tplgen}}
+		.item{.url[GitHub account]{http://github.com/tindzk}}
+	}
+}
+
+.chapter[Contact] {
+	.mail[Tim Nieradzik]{tim.nieradzik@gmx.de}
+}
