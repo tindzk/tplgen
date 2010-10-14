@@ -33,15 +33,19 @@ int main(int argc, char **argv) {
 		Logger_Level_Info  |
 		Logger_Level_Trace);
 
-	Application app;
-	Application_Init(&app);
-
 	if (argc <= 1) {
 		Logger_Log(&logger, Logger_Level_Error,
 			String("No parameters specified."));
 
 		return EXIT_FAILURE;
 	}
+
+	struct {
+		Application app;
+	} private;
+
+	ApplicationClass app = Application_AsClass(&private.app);
+	Application_Init(app);
 
 	for (size_t i = 1; i < (size_t) argc; i++) {
 		String arg = String_FromNul(argv[i]);
@@ -55,13 +59,13 @@ int main(int argc, char **argv) {
 		String name  = String_Slice(arg, 0, pos);
 		String value = String_Slice(arg, pos + 1);
 
-		if (!Application_SetOption(&app, name, value)) {
+		if (!Application_SetOption(app, name, value)) {
 			return EXIT_FAILURE;
 		}
 	}
 
 	try(&exc) {
-		Application_Process(&app);
+		Application_Process(app);
 	} catchAny(e) {
 		Exception_Print(e);
 
@@ -71,7 +75,7 @@ int main(int argc, char **argv) {
 
 		return EXIT_FAILURE;
 	} finally {
-		Application_Destroy(&app);
+		Application_Destroy(app);
 	} tryEnd;
 
 	return EXIT_SUCCESS;

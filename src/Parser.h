@@ -37,7 +37,7 @@ typedef struct {
 
 	bool proceed;
 	char proceedChar;
-} Parser;
+} Class(self);
 
 def(void, Init, StreamInterface *stream, void *context);
 void ref(DestroyToken)(ref(Token) *token);

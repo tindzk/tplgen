@@ -1,4 +1,5 @@
 #import "Application.h"
+#import <App.h>
 
 extern Logger logger;
 extern ExceptionManager exc;
@@ -29,8 +30,7 @@ def(void, Destroy) {
 
 	DoublyLinkedList_Destroy(&this->methods, ^(Method_Item *item) {
 		Method_Destroy(item->method);
-		Memory_Free(item->method);
-
+		Method_Free(item->method);
 		Memory_Free(item);
 	});
 
@@ -78,7 +78,7 @@ def(bool, SetOption, String name, String value) {
 	return true;
 }
 
-static String ref(FormatVariables)(String s) {
+static def(String, FormatVariables, String s) {
 	String tmp = String_Clone(s);
 
 	String_ReplaceAll(&tmp, String("#"), String("this->"));
@@ -87,7 +87,7 @@ static String ref(FormatVariables)(String s) {
 	return tmp;
 }
 
-static void ref(HandlePrintVariable)(Method *method, String s, bool isInt) {
+static def(void, HandlePrintVariable, MethodClass method, String s, bool isInt) {
 	String line = HeapString(s.len);
 	String_Append(&line, String("String_Append(res, "));
 
@@ -95,7 +95,7 @@ static void ref(HandlePrintVariable)(Method *method, String s, bool isInt) {
 		String_Append(&line, String("Integer_ToString("));
 	}
 
-	String var = ref(FormatVariables)(s);
+	String var = call(FormatVariables, s);
 	String_Append(&line, var);
 	String_Destroy(&var);
 
@@ -110,8 +110,8 @@ static void ref(HandlePrintVariable)(Method *method, String s, bool isInt) {
 	String_Destroy(&line);
 }
 
-static void ref(HandleTemplate)(Method *method, String s) {
-	String var  = ref(FormatVariables)(s);
+static def(void, HandleTemplate, MethodClass method, String s) {
+	String var  = call(FormatVariables, s);
 	String line = String_Format(String("%.render(%.context, res);"),
 		var, var);
 
@@ -121,8 +121,8 @@ static void ref(HandleTemplate)(Method *method, String s) {
 	String_Destroy(&var);
 }
 
-static void ref(HandleIf)(Method *method, String s) {
-	String var  = ref(FormatVariables)(s);
+static def(void, HandleIf, MethodClass method, String s) {
+	String var  = call(FormatVariables, s);
 	String line = String_Format(String("if (%) {"), var);
 
 	Method_AddLine(method, line);
@@ -132,8 +132,8 @@ static void ref(HandleIf)(Method *method, String s) {
 	String_Destroy(&var);
 }
 
-static void ref(HandleIfEmpty)(Method *method, String s) {
-	String var  = ref(FormatVariables)(s);
+static def(void, HandleIfEmpty, MethodClass method, String s) {
+	String var  = call(FormatVariables, s);
 	String line = String_Format(String("if (%.len == 0) {"), var);
 
 	Method_AddLine(method, line);
@@ -143,14 +143,14 @@ static void ref(HandleIfEmpty)(Method *method, String s) {
 	String_Destroy(&var);
 }
 
-static void ref(HandleElse)(Method *method, String s) {
+static def(void, HandleElse, MethodClass method, String s) {
 	Method_Unindent(method);
 
 	if (s.len == 0) {
 		Method_AddLine(method, String("} else {"));
 		Method_Indent(method);
 	} else {
-		String var  = ref(FormatVariables)(s);
+		String var  = call(FormatVariables, s);
 		String line = String_Format(String("} else if (%) {"), var);
 
 		Method_AddLine(method, line);
@@ -161,12 +161,12 @@ static void ref(HandleElse)(Method *method, String s) {
 	}
 }
 
-static void ref(HandleEnd)(Method *method) {
+static def(void, HandleEnd, MethodClass method) {
 	Method_Unindent(method);
 	Method_AddLine(method, String("}"));
 }
 
-static void ref(HandleBlock)(Method *method, String params) {
+static def(void, HandleBlock, MethodClass method, String params) {
 	ssize_t offset = String_Find(params, ' ');
 
 	String line;
@@ -174,7 +174,7 @@ static void ref(HandleBlock)(Method *method, String params) {
 	if (offset == String_NotFound) {
 		line = String_Format(String("%(res);"), params);
 	} else {
-		String var = ref(FormatVariables)(
+		String var = call(FormatVariables,
 			String_Slice(params, offset + 1));
 
 		line = String_Format(String("%(%, res);"),
@@ -189,7 +189,7 @@ static void ref(HandleBlock)(Method *method, String params) {
 	String_Destroy(&line);
 }
 
-static void ref(HandleFor)(Method *method, String params) {
+static def(void, HandleFor, MethodClass method, String params) {
 	StringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
@@ -199,7 +199,7 @@ static void ref(HandleFor)(Method *method, String params) {
 		throw(&exc, excParsingFailed);
 	}
 
-	String iter   = ref(FormatVariables)(parts->buf[0]);
+	String iter   = call(FormatVariables, parts->buf[0]);
 	String option = parts->buf[1];
 	String from   = parts->buf[2];
 
@@ -228,7 +228,7 @@ static void ref(HandleFor)(Method *method, String params) {
 
 		String_Destroy(&line);
 	} else {
-		String var = ref(FormatVariables)(from);
+		String var = call(FormatVariables, from);
 
 		String line1 = String_Format(
 			String("for (size_t i = 0; i < %->len; i++) {"),
@@ -252,7 +252,7 @@ static void ref(HandleFor)(Method *method, String params) {
 	Array_Destroy(parts);
 }
 
-static void ref(HandlePass)(Method *method, String params) {
+static def(void, HandlePass, MethodClass method, String params) {
 	String fmt;
 	ssize_t pos = String_Find(params, ' ');
 
@@ -266,7 +266,7 @@ static void ref(HandlePass)(Method *method, String params) {
 
 			params);
 	} else {
-		String var = ref(FormatVariables)(String_Slice(params, pos + 1));
+		String var = call(FormatVariables, String_Slice(params, pos + 1));
 
 		fmt = String_Format(String(
 			"{ "
@@ -286,27 +286,27 @@ static void ref(HandlePass)(Method *method, String params) {
 	String_Destroy(&fmt);
 }
 
-static void ref(HandleCommand)(Method *method, String name, String params) {
+static def(void, HandleCommand, MethodClass method, String name, String params) {
 	if (name.buf[0] == '$' || name.buf[0] == '#') {
-		ref(HandlePrintVariable)(method, name, false);
+		call(HandlePrintVariable, method, name, false);
 	} else if (String_Equals(name, String("for"))) {
-		ref(HandleFor)(method, params);
+		call(HandleFor, method, params);
 	} else if (String_Equals(name, String("if"))) {
-		ref(HandleIf)(method, params);
+		call(HandleIf, method, params);
 	} else if (String_Equals(name, String("empty"))) {
-		ref(HandleIfEmpty)(method, params);
+		call(HandleIfEmpty, method, params);
 	} else if (String_Equals(name, String("else"))) {
-		ref(HandleElse)(method, params);
+		call(HandleElse, method, params);
 	} else if (String_Equals(name, String("end"))) {
-		ref(HandleEnd)(method);
+		call(HandleEnd, method);
 	} else if (String_Equals(name, String("block"))) {
-		ref(HandleBlock)(method, params);
+		call(HandleBlock, method, params);
 	} else if (String_Equals(name, String("int"))) {
-		ref(HandlePrintVariable)(method, params, true);
+		call(HandlePrintVariable, method, params, true);
 	} else if (String_Equals(name, String("tpl"))) {
-		ref(HandleTemplate)(method, params);
+		call(HandleTemplate, method, params);
 	} else if (String_Equals(name, String("pass"))) {
-		ref(HandlePass)(method, params);
+		call(HandlePass, method, params);
 	} else {
 		Logger_LogFmt(&logger, Logger_Level_Error,
 			String("Command '%' is unknown."), name);
@@ -315,7 +315,7 @@ static void ref(HandleCommand)(Method *method, String name, String params) {
 	}
 }
 
-static String ref(EscapeLine)(String s) {
+static def(String, EscapeLine, String s) {
 	String res = HeapString(s.len + 15);
 
 	for (size_t i = 0; i < s.len; i++) {
@@ -329,7 +329,7 @@ static String ref(EscapeLine)(String s) {
 	return res;
 }
 
-static void ref(FlushBuf)(Method *method, String s) {
+static def(void, FlushBuf, MethodClass method, String s) {
 	bool flushed = false;
 
 	StringArray *items = String_Split(s, '\n');
@@ -343,7 +343,7 @@ static void ref(FlushBuf)(Method *method, String s) {
 			flushed = true;
 		}
 
-		String escaped = ref(EscapeLine)(line);
+		String escaped = call(EscapeLine, line);
 
 		String_Prepend(&escaped, '"');
 
@@ -368,8 +368,8 @@ static void ref(FlushBuf)(Method *method, String s) {
 	Array_Destroy(items);
 }
 
-static def(Method *, NewMethod, String name) {
-	Method *method = New(Method);
+static def(MethodClass, NewMethod, String name) {
+	MethodClass method = Method_New();
 
 	Method_Init(method, name, this->itf);
 
@@ -382,8 +382,8 @@ static def(Method *, NewMethod, String name) {
 	return method;
 }
 
-static def(Method *, NewBlockMethod, String name, String params) {
-	Method *method = New(Method);
+static def(MethodClass, NewBlockMethod, String name, String params) {
+	MethodClass method = Method_New();
 
 	Method_Init(method, name, true);
 
@@ -399,19 +399,19 @@ static def(Method *, NewBlockMethod, String name, String params) {
 	return method;
 }
 
-static bool ref(StartsCommandBlock)(String cmd) {
+static def(bool, StartsCommandBlock, String cmd) {
 	return String_Equals(cmd, String("if"))
 		|| String_Equals(cmd, String("for"))
 		|| String_Equals(cmd, String("else"))
 		|| String_Equals(cmd, String("empty"));
 }
 
-static bool ref(EndsCommandBlock)(String cmd) {
+static def(bool, EndsCommandBlock, String cmd) {
 	return String_Equals(cmd, String("end"))
 		|| String_Equals(cmd, String("else"));
 }
 
-static def(void, ParseTemplate, Parser *parser, bool inBlock, Method *method) {
+static def(void, ParseTemplate, ParserClass parser, bool inBlock, MethodClass method) {
 	Parser_Token prev = Parser_Token();
 	Parser_Token cur  = Parser_Token();
 	Parser_Token next = Parser_Token();
@@ -422,7 +422,7 @@ static def(void, ParseTemplate, Parser *parser, bool inBlock, Method *method) {
 		if (cur.state == Parser_State_Text) {
 			String text = cur.u.text;
 
-			if ((prev.state == Parser_State_Command && ref(StartsCommandBlock)(prev.u.cmd.name))
+			if ((prev.state == Parser_State_Command && call(StartsCommandBlock, prev.u.cmd.name))
 			  || first)
 			{
 				text  = String_Trim(text, String_TrimLeft);
@@ -431,16 +431,16 @@ static def(void, ParseTemplate, Parser *parser, bool inBlock, Method *method) {
 
 			next = Parser_Fetch(parser);
 
-			if ((next.state == Parser_State_Command && ref(EndsCommandBlock)(next.u.cmd.name))
+			if ((next.state == Parser_State_Command && call(EndsCommandBlock, next.u.cmd.name))
 			  || next.state == Parser_State_Block)
 			{
 				text = String_Trim(text, String_TrimRight);
 			}
 
-			ref(FlushBuf)(method, text);
+			call(FlushBuf, method, text);
 		} else {
 			if (cur.state == Parser_State_Command) {
-				ref(HandleCommand)(method,
+				call(HandleCommand, method,
 					cur.u.cmd.name,
 					cur.u.cmd.params);
 			} else if (cur.state == Parser_State_Block) {
@@ -464,11 +464,12 @@ static def(void, ParseTemplate, Parser *parser, bool inBlock, Method *method) {
 				if (pos != String_NotFound) {
 					blkname   = String_Slice(cur.u.block, 0, pos);
 					blkparams = String_Slice(cur.u.block, pos + 2);
-					blkparams = ref(FormatVariables)(blkparams);
+					blkparams = call(FormatVariables, blkparams);
 				}
 
-				ref(ParseTemplate)(this, parser, true,
-					ref(NewBlockMethod)(this, blkname, blkparams));
+				MethodClass blockMethod =
+					call(NewBlockMethod, blkname, blkparams);
+				call(ParseTemplate, parser, true, blockMethod);
 
 				String_Destroy(&blkparams);
 			}
@@ -528,12 +529,19 @@ def(void, Process) {
 	}
 
 	if (this->dir.len > 0) {
-		ref(Scan)(this);
+		call(Scan);
 	}
 
-	Output output;
-	Output_Init(&output, this->out, this->itf);
-	Output_SetClassName(&output, this->name);
+	struct {
+		Output output;
+		Parser parser;
+	} private;
+
+	OutputClass output = Output_AsClass(&private.output);
+	ParserClass parser = Parser_AsClass(&private.parser);
+
+	Output_Init(output, this->out, this->itf);
+	Output_SetClassName(output, this->name);
 
 	for (size_t i = 0; i < this->files->len; i++) {
 		Logger_LogFmt(&logger, Logger_Level_Info,
@@ -548,17 +556,16 @@ def(void, Process) {
 		BufferedStream_Init(&stream, &FileStream_Methods, &tplFile);
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);
 
-		Parser parser;
-		Parser_Init(&parser, &BufferedStream_Methods, &stream);
+		Parser_Init(parser, &BufferedStream_Methods, &stream);
 
-		ref(ParseTemplate)(this, &parser, false,
-			ref(NewMethod)(this, this->files->buf[i].name));
+		MethodClass method = call(NewMethod, this->files->buf[i].name);
+		call(ParseTemplate, parser, false, method);
 
 		BufferedStream_Close(&stream);
 		BufferedStream_Destroy(&stream);
 	}
 
-	Output_Write(&output, &this->methods);
+	Output_Write(output, &this->methods);
 
-	Output_Destroy(&output);
+	Output_Destroy(output);
 }

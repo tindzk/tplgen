@@ -16,7 +16,7 @@ typedef struct {
 	BufferedStream output;
 
 	String className;
-} self;
+} Class(self);
 
 def(void, Init, String file, bool itf);
 def(void, Destroy);

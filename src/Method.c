@@ -1,4 +1,5 @@
 #import "Method.h"
+#import <App.h>
 
 extern ExceptionManager exc;
 

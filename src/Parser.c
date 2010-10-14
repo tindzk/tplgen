@@ -1,4 +1,5 @@
 #import "Parser.h"
+#import <App.h>
 
 def(void, Init, StreamInterface *stream, void *context) {
 	this->stream  = stream;
@@ -103,10 +104,10 @@ def(ref(Token), Fetch) {
 		next:
 			if (cur == '[') {
 				token.state = ref(State_Block);
-				ref(ParseBlock)(this, &token);
+				call(ParseBlock, &token);
 			} else {
 				token.state = ref(State_Command);
-				ref(ParseCommand)(this, &token);
+				call(ParseCommand, &token);
 			}
 
 			return token;

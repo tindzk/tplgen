@@ -1,4 +1,5 @@
 #import "Output.h"
+#import <App.h>
 
 def(void, Init, String file, bool itf) {
 	this->itf = itf;
@@ -30,68 +31,68 @@ def(void, SetClassName, String s) {
 }
 
 def(void, Write, Method_List *methods) {
-	ref(WriteString)(this, String(
+	call(WriteString, String(
 		"/* "
 			"Warning: This file is auto-generated. "
 		"*/"
 		"\n"
 		"\n"));
 
-	ref(WriteString)(this, String("#import \""));
-	ref(WriteString)(this, this->className);
-	ref(WriteString)(this, String(".h\"\n\n"));
+	call(WriteString, String("#import \""));
+	call(WriteString, this->className);
+	call(WriteString, String(".h\"\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
 	DoublyLinkedList_ReverseForeach(methods, node) {
-		Method *method = node->method;
+		Method *method = Method_GetPtr(node->method);
 
 		if (method->hidden) {
-			ref(WriteString)(this, String("static "));
+			call(WriteString, String("static "));
 		}
 
-		ref(WriteString)(this, String("void "));
+		call(WriteString, String("void "));
 
 		if (!method->block) {
-			ref(WriteString)(this, this->className);
-			ref(WriteString)(this, String("_"));
+			call(WriteString, this->className);
+			call(WriteString, String("_"));
 		}
 
-		ref(WriteString)(this, method->name);
-		ref(WriteString)(this, String("("));
+		call(WriteString, method->name);
+		call(WriteString, String("("));
 
 		if (method->block) {
-			ref(WriteString)(this, method->params);
+			call(WriteString, method->params);
 
 			if (method->params.len > 0) {
-				ref(WriteString)(this, String(", "));
+				call(WriteString, String(", "));
 			}
 		} else {
-			ref(WriteString)(this, method->name);
-			ref(WriteString)(this, String("Template *this, "));
+			call(WriteString, method->name);
+			call(WriteString, String("Template *this, "));
 		}
 
-		ref(WriteString)(this, String("String *res) {\n"));
+		call(WriteString, String("String *res) {\n"));
 
 		LinkedList_Foreach(&method->lines, lineNode) {
 			for (size_t i = 0; i <= lineNode->indent; i++) {
-				ref(WriteString)(this, String("\t"));
+				call(WriteString, String("\t"));
 			}
 
-			ref(WriteString)(this, lineNode->line);
-			ref(WriteString)(this, String("\n"));
+			call(WriteString, lineNode->line);
+			call(WriteString, String("\n"));
 		}
 
-		ref(WriteString)(this, String("}\n\n"));
+		call(WriteString, String("}\n\n"));
 	}
 
 	if (this->itf) {
-		ref(WriteString)(this, String("TemplateInterface Templates_"));
-		ref(WriteString)(this, this->className);
-		ref(WriteString)(this, String(" = {\n"));
+		call(WriteString, String("TemplateInterface Templates_"));
+		call(WriteString, this->className);
+		call(WriteString, String(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
-			Method *method = node->method;
+			Method *method = Method_GetPtr(node->method);
 
 			if (method->block) {
 				continue;
@@ -100,18 +101,18 @@ def(void, Write, Method_List *methods) {
 			String name = String_Clone(method->name);
 			name.buf[0] = (char) Char_ToLower(name.buf[0]);
 
-			ref(WriteString)(this, String("\t."));
-			ref(WriteString)(this, name);
-			ref(WriteString)(this, String(" = &"));
-			ref(WriteString)(this, this->className);
-			ref(WriteString)(this, String("_"));
-			ref(WriteString)(this, method->name);
-			ref(WriteString)(this, String(",\n"));
+			call(WriteString, String("\t."));
+			call(WriteString, name);
+			call(WriteString, String(" = &"));
+			call(WriteString, this->className);
+			call(WriteString, String("_"));
+			call(WriteString, method->name);
+			call(WriteString, String(",\n"));
 
 			String_Destroy(&name);
 		}
 
-		ref(WriteString)(this, String("};"));
+		call(WriteString, String("};"));
 	}
 
 	BufferedStream_Flush(&this->output);

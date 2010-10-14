@@ -31,7 +31,7 @@ typedef struct {
 	Method_List methods;
 
 	Array(ref(TemplateItem), *files);
-} self;
+} Class(self);
 
 void Application0(void);
 

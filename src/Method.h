@@ -28,10 +28,10 @@ typedef struct {
 	size_t indent;
 
 	ref(LineList) lines;
-} self;
+} Class(self);
 
 typedef struct ref(Item) {
-	self *method;
+	MethodClass method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 } ref(Item);
 
