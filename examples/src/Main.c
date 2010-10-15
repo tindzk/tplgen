@@ -54,5 +54,5 @@ int main(__unused int argc, __unused char *argv[]) {
 	Array_Destroy(articles);
 	String_Destroy(&res);
 
-	return EXIT_SUCCESS;
+	return ExitStatus_Success;
 }

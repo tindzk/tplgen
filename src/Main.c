@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 		Logger_Log(&logger, Logger_Level_Error,
 			String("No parameters specified."));
 
-		return EXIT_FAILURE;
+		return ExitStatus_Failure;
 	}
 
 	struct {
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 		String value = String_Slice(arg, pos + 1);
 
 		if (!Application_SetOption(app, name, value)) {
-			return EXIT_FAILURE;
+			return ExitStatus_Failure;
 		}
 	}
 
@@ -73,10 +73,10 @@ int main(int argc, char **argv) {
 		Backtrace_PrintTrace(e->trace, e->traceItems);
 #endif
 
-		return EXIT_FAILURE;
+		return ExitStatus_Failure;
 	} finally {
 		Application_Destroy(app);
 	} tryEnd;
 
-	return EXIT_SUCCESS;
+	return ExitStatus_Success;
 }
