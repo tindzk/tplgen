@@ -31,7 +31,7 @@ typedef struct {
 } Class(self);
 
 typedef struct ref(Item) {
-	MethodClass method;
+	MethodInstance method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 } ref(Item);
 

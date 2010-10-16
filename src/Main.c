@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 		Application app;
 	} private;
 
-	ApplicationClass app = Application_AsClass(&private.app);
+	ApplicationInstance app = Application_FromObject(&private.app);
 	Application_Init(app);
 
 	for (size_t i = 1; i < (size_t) argc; i++) {

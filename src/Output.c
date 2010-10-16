@@ -45,7 +45,7 @@ def(void, Write, Method_List *methods) {
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
 	DoublyLinkedList_ReverseForeach(methods, node) {
-		Method *method = Method_GetPtr(node->method);
+		Method *method = Method_GetObject(node->method);
 
 		if (method->hidden) {
 			call(WriteString, String("static "));
@@ -92,7 +92,7 @@ def(void, Write, Method_List *methods) {
 		call(WriteString, String(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
-			Method *method = Method_GetPtr(node->method);
+			Method *method = Method_GetObject(node->method);
 
 			if (method->block) {
 				continue;

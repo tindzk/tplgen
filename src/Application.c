@@ -87,7 +87,7 @@ static def(String, FormatVariables, String s) {
 	return tmp;
 }
 
-static def(void, HandlePrintVariable, MethodClass method, String s, bool isInt) {
+static def(void, HandlePrintVariable, MethodInstance method, String s, bool isInt) {
 	String line = HeapString(s.len);
 	String_Append(&line, String("String_Append(res, "));
 
@@ -110,7 +110,7 @@ static def(void, HandlePrintVariable, MethodClass method, String s, bool isInt) 
 	String_Destroy(&line);
 }
 
-static def(void, HandleTemplate, MethodClass method, String s) {
+static def(void, HandleTemplate, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
 	String line = String_Format(String("%.render(%.context, res);"),
 		var, var);
@@ -121,7 +121,7 @@ static def(void, HandleTemplate, MethodClass method, String s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleIf, MethodClass method, String s) {
+static def(void, HandleIf, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
 	String line = String_Format(String("if (%) {"), var);
 
@@ -132,7 +132,7 @@ static def(void, HandleIf, MethodClass method, String s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleIfEmpty, MethodClass method, String s) {
+static def(void, HandleIfEmpty, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
 	String line = String_Format(String("if (%.len == 0) {"), var);
 
@@ -143,7 +143,7 @@ static def(void, HandleIfEmpty, MethodClass method, String s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleElse, MethodClass method, String s) {
+static def(void, HandleElse, MethodInstance method, String s) {
 	Method_Unindent(method);
 
 	if (s.len == 0) {
@@ -161,12 +161,12 @@ static def(void, HandleElse, MethodClass method, String s) {
 	}
 }
 
-static def(void, HandleEnd, MethodClass method) {
+static def(void, HandleEnd, MethodInstance method) {
 	Method_Unindent(method);
 	Method_AddLine(method, String("}"));
 }
 
-static def(void, HandleBlock, MethodClass method, String params) {
+static def(void, HandleBlock, MethodInstance method, String params) {
 	ssize_t offset = String_Find(params, ' ');
 
 	String line;
@@ -189,7 +189,7 @@ static def(void, HandleBlock, MethodClass method, String params) {
 	String_Destroy(&line);
 }
 
-static def(void, HandleFor, MethodClass method, String params) {
+static def(void, HandleFor, MethodInstance method, String params) {
 	StringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
@@ -252,7 +252,7 @@ static def(void, HandleFor, MethodClass method, String params) {
 	Array_Destroy(parts);
 }
 
-static def(void, HandlePass, MethodClass method, String params) {
+static def(void, HandlePass, MethodInstance method, String params) {
 	String fmt;
 	ssize_t pos = String_Find(params, ' ');
 
@@ -286,7 +286,7 @@ static def(void, HandlePass, MethodClass method, String params) {
 	String_Destroy(&fmt);
 }
 
-static def(void, HandleCommand, MethodClass method, String name, String params) {
+static def(void, HandleCommand, MethodInstance method, String name, String params) {
 	if (name.buf[0] == '$' || name.buf[0] == '#') {
 		call(HandlePrintVariable, method, name, false);
 	} else if (String_Equals(name, String("for"))) {
@@ -329,7 +329,7 @@ static def(String, EscapeLine, String s) {
 	return res;
 }
 
-static def(void, FlushBuf, MethodClass method, String s) {
+static def(void, FlushBuf, MethodInstance method, String s) {
 	bool flushed = false;
 
 	StringArray *items = String_Split(s, '\n');
@@ -368,8 +368,8 @@ static def(void, FlushBuf, MethodClass method, String s) {
 	Array_Destroy(items);
 }
 
-static def(MethodClass, NewMethod, String name) {
-	MethodClass method = Method_New();
+static def(MethodInstance, NewMethod, String name) {
+	MethodInstance method = Method_New();
 
 	Method_Init(method, name, this->itf);
 
@@ -382,8 +382,8 @@ static def(MethodClass, NewMethod, String name) {
 	return method;
 }
 
-static def(MethodClass, NewBlockMethod, String name, String params) {
-	MethodClass method = Method_New();
+static def(MethodInstance, NewBlockMethod, String name, String params) {
+	MethodInstance method = Method_New();
 
 	Method_Init(method, name, true);
 
@@ -411,7 +411,7 @@ static def(bool, EndsCommandBlock, String cmd) {
 		|| String_Equals(cmd, String("else"));
 }
 
-static def(void, ParseTemplate, ParserClass parser, bool inBlock, MethodClass method) {
+static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInstance method) {
 	Parser_Token prev = Parser_Token();
 	Parser_Token cur  = Parser_Token();
 	Parser_Token next = Parser_Token();
@@ -467,7 +467,7 @@ static def(void, ParseTemplate, ParserClass parser, bool inBlock, MethodClass me
 					blkparams = call(FormatVariables, blkparams);
 				}
 
-				MethodClass blockMethod =
+				MethodInstance blockMethod =
 					call(NewBlockMethod, blkname, blkparams);
 				call(ParseTemplate, parser, true, blockMethod);
 
@@ -537,8 +537,8 @@ def(void, Process) {
 		Parser parser;
 	} private;
 
-	OutputClass output = Output_AsClass(&private.output);
-	ParserClass parser = Parser_AsClass(&private.parser);
+	OutputInstance output = Output_FromObject(&private.output);
+	ParserInstance parser = Parser_FromObject(&private.parser);
 
 	Output_Init(output, this->out, this->itf);
 	Output_SetClassName(output, this->name);
@@ -558,7 +558,7 @@ def(void, Process) {
 
 		Parser_Init(parser, &BufferedStream_Methods, &stream);
 
-		MethodClass method = call(NewMethod, this->files->buf[i].name);
+		MethodInstance method = call(NewMethod, this->files->buf[i].name);
 		call(ParseTemplate, parser, false, method);
 
 		BufferedStream_Close(&stream);
