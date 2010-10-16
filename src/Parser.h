@@ -4,14 +4,14 @@
 #undef self
 #define self Parser
 
-typedef enum {
+set {
 	ref(State_None),
 	ref(State_Text),
 	ref(State_Command),
 	ref(State_Block)
 } ref(State);
 
-typedef struct {
+record {
 	ref(State) state;
 
 	union {
@@ -31,7 +31,7 @@ typedef struct {
 		.state = Parser_State_None \
 	}
 
-typedef struct {
+record {
 	StreamInterface *stream;
 	void *context;
 

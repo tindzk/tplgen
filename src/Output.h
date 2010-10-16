@@ -9,7 +9,7 @@
 #undef self
 #define self Output
 
-typedef struct {
+record {
 	bool itf;
 
 	File file;

@@ -16,12 +16,12 @@
 
 extern size_t Modules_Application;
 
-typedef struct {
+record {
 	String name;
 	String file;
 } ref(TemplateItem);
 
-typedef struct {
+record {
 	bool itf;
 	String dir;
 	String ext;

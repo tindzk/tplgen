@@ -10,7 +10,7 @@
 
 extern size_t Modules_Method;
 
-typedef struct ref(LineItem) {
+record ref(LineItem) {
 	String line;
 	size_t indent;
 	LinkedList_DeclareRef(ref(LineItem));
@@ -18,7 +18,7 @@ typedef struct ref(LineItem) {
 
 LinkedList_DeclareList(ref(LineItem), ref(LineList));
 
-typedef struct {
+record {
 	bool block;
 	bool hidden;
 
@@ -30,7 +30,7 @@ typedef struct {
 	ref(LineList) lines;
 } Class(self);
 
-typedef struct ref(Item) {
+record ref(Item) {
 	MethodInstance method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 } ref(Item);
