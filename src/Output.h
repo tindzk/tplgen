@@ -9,14 +9,14 @@
 #undef self
 #define self Output
 
-record {
+Class(self) {
 	bool itf;
 
 	File file;
 	BufferedStream output;
 
 	String className;
-} Class(self);
+};
 
 def(void, Init, String file, bool itf);
 def(void, Destroy);

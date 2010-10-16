@@ -16,12 +16,12 @@
 
 extern size_t Modules_Application;
 
-record {
+Class(ref(TemplateItem)) {
 	String name;
 	String file;
-} ref(TemplateItem);
+};
 
-record {
+Class(self) {
 	bool itf;
 	String dir;
 	String ext;
@@ -31,7 +31,7 @@ record {
 	Method_List methods;
 
 	Array(ref(TemplateItem), *files);
-} Class(self);
+};
 
 void Application0(void);
 

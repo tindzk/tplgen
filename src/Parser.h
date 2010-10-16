@@ -11,7 +11,7 @@ set {
 	ref(State_Block)
 } ref(State);
 
-record {
+Class(ref(Token)) {
 	ref(State) state;
 
 	union {
@@ -24,20 +24,20 @@ record {
 
 		String block;
 	} u;
-} ref(Token);
+};
 
 #define Parser_Token() \
 	(Parser_Token) {   \
 		.state = Parser_State_None \
 	}
 
-record {
+Class(self) {
 	StreamInterface *stream;
 	void *context;
 
 	bool proceed;
 	char proceedChar;
-} Class(self);
+};
 
 def(void, Init, StreamInterface *stream, void *context);
 void ref(DestroyToken)(ref(Token) *token);
