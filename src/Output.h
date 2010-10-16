@@ -9,7 +9,7 @@
 #undef self
 #define self Output
 
-Class(self) {
+class(self) {
 	bool itf;
 
 	File file;

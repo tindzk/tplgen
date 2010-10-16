@@ -10,7 +10,7 @@
 
 extern size_t Modules_Method;
 
-Class(ref(LineItem)) {
+class(ref(LineItem)) {
 	String line;
 	size_t indent;
 	LinkedList_DeclareRef(ref(LineItem));
@@ -18,7 +18,7 @@ Class(ref(LineItem)) {
 
 LinkedList_DeclareList(ref(LineItem), ref(LineList));
 
-Class(self) {
+class(self) {
 	bool block;
 	bool hidden;
 
@@ -32,7 +32,7 @@ Class(self) {
 
 ExtendClass(self);
 
-Class(ref(Item)) {
+class(ref(Item)) {
 	MethodInstance method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 };

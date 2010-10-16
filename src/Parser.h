@@ -11,7 +11,7 @@ set(ref(State)) {
 	ref(State_Block)
 };
 
-Class(ref(Token)) {
+class(ref(Token)) {
 	ref(State) state;
 
 	union {
@@ -31,7 +31,7 @@ Class(ref(Token)) {
 		.state = Parser_State_None \
 	}
 
-Class(self) {
+class(self) {
 	StreamInterface *stream;
 	void *context;
 

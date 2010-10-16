@@ -16,12 +16,12 @@
 
 extern size_t Modules_Application;
 
-Class(ref(TemplateItem)) {
+class(ref(TemplateItem)) {
 	String name;
 	String file;
 };
 
-Class(self) {
+class(self) {
 	bool itf;
 	String dir;
 	String ext;
