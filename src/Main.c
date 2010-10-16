@@ -34,9 +34,7 @@ int main(int argc, char **argv) {
 		Logger_Level_Trace);
 
 	if (argc <= 1) {
-		Logger_Log(&logger, Logger_Level_Error,
-			String("No parameters specified."));
-
+		Logger_Error(&logger, String("No parameters specified."));
 		return ExitStatus_Failure;
 	}
 

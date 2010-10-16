@@ -51,7 +51,7 @@ def(bool, SetOption, String name, String value) {
 		StringArray *parts = String_Split(value, ':');
 
 		if (parts->len < 2) {
-			Logger_Log(&logger, Logger_Level_Error,
+			Logger_Error(&logger,
 				String("`add' requires two values separated by a colon."));
 
 			Array_Destroy(parts);
@@ -193,9 +193,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 	StringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
-		Logger_Log(&logger, Logger_Level_Error,
-			String("Incomplete for-loop."));
-
+		Logger_Error(&logger, String("Incomplete for-loop."));
 		throw(&exc, excParsingFailed);
 	}
 
@@ -204,8 +202,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 	String from   = parts->buf[2];
 
 	if (!String_Equals(option, String("in"))) {
-		Logger_LogFmt(&logger, Logger_Level_Error,
-			String("For loops don't support '%'"),
+		Logger_Error(&logger, String("For loops don't support '%'"),
 			option);
 
 		throw(&exc, excParsingFailed);
@@ -308,8 +305,8 @@ static def(void, HandleCommand, MethodInstance method, String name, String param
 	} else if (String_Equals(name, String("pass"))) {
 		call(HandlePass, method, params);
 	} else {
-		Logger_LogFmt(&logger, Logger_Level_Error,
-			String("Command '%' is unknown."), name);
+		Logger_Error(&logger, String("Command '%' is unknown."),
+			name);
 
 		throw(&exc, excParsingFailed);
 	}
@@ -449,7 +446,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 						goto out;
 					}
 
-					Logger_LogFmt(&logger, Logger_Level_Error,
+					Logger_Error(&logger,
 						String("'%' not understood."),
 						cur.u.block);
 
@@ -522,9 +519,7 @@ def(void, Scan) {
 
 def(void, Process) {
 	if (this->out.len == 0) {
-		Logger_Log(&logger, Logger_Level_Error,
-			String("No output path is set."));
-
+		Logger_Error(&logger, String("No output path is set."));
 		throw(&exc, excInvalidParameter);
 	}
 
@@ -544,8 +539,7 @@ def(void, Process) {
 	Output_SetClassName(output, this->name);
 
 	for (size_t i = 0; i < this->files->len; i++) {
-		Logger_LogFmt(&logger, Logger_Level_Info,
-			String("Processing %..."),
+		Logger_Info(&logger, String("Processing %..."),
 			this->files->buf[i].file);
 
 		FileStream tplFile;
