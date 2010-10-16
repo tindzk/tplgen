@@ -4,12 +4,12 @@
 #undef self
 #define self Parser
 
-set {
+set(ref(State)) {
 	ref(State_None),
 	ref(State_Text),
 	ref(State_Command),
 	ref(State_Block)
-} ref(State);
+};
 
 Class(ref(Token)) {
 	ref(State) state;
