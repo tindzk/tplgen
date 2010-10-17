@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 		Backtrace_PrintTrace(e->trace, e->traceItems);
 #endif
 
-		return ExitStatus_Failure;
+		excReturn ExitStatus_Failure;
 	} finally {
 		Application_Destroy(app);
 	} tryEnd;
