@@ -23,7 +23,7 @@ class(ref(Token)) {
 		} cmd;
 
 		String block;
-	} u;
+	};
 };
 
 #define Parser_Token() \

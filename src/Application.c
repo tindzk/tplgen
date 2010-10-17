@@ -417,9 +417,9 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 
 	do {
 		if (cur.state == Parser_State_Text) {
-			String text = cur.u.text;
+			String text = cur.text;
 
-			if ((prev.state == Parser_State_Command && call(StartsCommandBlock, prev.u.cmd.name))
+			if ((prev.state == Parser_State_Command && call(StartsCommandBlock, prev.cmd.name))
 			  || first)
 			{
 				text  = String_Trim(text, String_TrimLeft);
@@ -428,7 +428,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 
 			next = Parser_Fetch(parser);
 
-			if ((next.state == Parser_State_Command && call(EndsCommandBlock, next.u.cmd.name))
+			if ((next.state == Parser_State_Command && call(EndsCommandBlock, next.cmd.name))
 			  || next.state == Parser_State_Block)
 			{
 				text = String_Trim(text, String_TrimRight);
@@ -438,29 +438,29 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 		} else {
 			if (cur.state == Parser_State_Command) {
 				call(HandleCommand, method,
-					cur.u.cmd.name,
-					cur.u.cmd.params);
+					cur.cmd.name,
+					cur.cmd.params);
 			} else if (cur.state == Parser_State_Block) {
 				if (inBlock) {
-					if (String_Equals(cur.u.block, String("end"))) {
+					if (String_Equals(cur.block, String("end"))) {
 						goto out;
 					}
 
 					Logger_Error(&logger,
 						String("'%' not understood."),
-						cur.u.block);
+						cur.block);
 
 					throw(&exc, excParsingFailed);
 				}
 
-				ssize_t pos = String_Find(cur.u.block, String(": "));
+				ssize_t pos = String_Find(cur.block, String(": "));
 
-				String blkname   = cur.u.block;
+				String blkname   = cur.block;
 				String blkparams = String("");
 
 				if (pos != String_NotFound) {
-					blkname   = String_Slice(cur.u.block, 0, pos);
-					blkparams = String_Slice(cur.u.block, pos + 2);
+					blkname   = String_Slice(cur.block, 0, pos);
+					blkparams = String_Slice(cur.block, pos + 2);
 					blkparams = call(FormatVariables, blkparams);
 				}
 

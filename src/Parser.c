@@ -12,16 +12,16 @@ def(void, Init, StreamInterface *stream, void *context) {
 void ref(DestroyToken)(ref(Token) *token) {
 	switch (token->state) {
 		case ref(State_Text):
-			String_Destroy(&token->u.text);
+			String_Destroy(&token->text);
 			break;
 
 		case ref(State_Command):
-			String_Destroy(&token->u.cmd.name);
-			String_Destroy(&token->u.cmd.params);
+			String_Destroy(&token->cmd.name);
+			String_Destroy(&token->cmd.params);
 			break;
 
 		case ref(State_Block):
-			String_Destroy(&token->u.block);
+			String_Destroy(&token->block);
 			break;
 
 		case ref(State_None):
@@ -49,11 +49,11 @@ static def(void, ParseCommand, ref(Token) *token) {
 	ssize_t pos = String_Find(buf, ' ');
 
 	if (pos != String_NotFound) {
-		token->u.cmd.name   = String_Clone(String_Slice(buf, 0, pos));
-		token->u.cmd.params = String_Clone(String_Slice(buf, pos + 1));
+		token->cmd.name   = String_Clone(String_Slice(buf, 0, pos));
+		token->cmd.params = String_Clone(String_Slice(buf, pos + 1));
 	} else {
-		token->u.cmd.name   = String_Clone(String_Slice(buf, 0));
-		token->u.cmd.params = String("");
+		token->cmd.name   = String_Clone(String_Slice(buf, 0));
+		token->cmd.params = String("");
 	}
 
 	String_Destroy(&buf);
@@ -62,7 +62,7 @@ static def(void, ParseCommand, ref(Token) *token) {
 static def(void, ParseBlock, ref(Token) *token) {
 	char cur = '\0';
 
-	token->u.block = HeapString(64);
+	token->block = HeapString(64);
 
 	while (!this->stream->isEof(this->context)) {
 		this->stream->read(this->context, &cur, 1);
@@ -71,7 +71,7 @@ static def(void, ParseBlock, ref(Token) *token) {
 			break;
 		}
 
-		String_Append(&token->u.block, cur);
+		String_Append(&token->block, cur);
 	}
 }
 
@@ -113,11 +113,11 @@ def(ref(Token), Fetch) {
 			return token;
 		} else {
 			if (token.state == ref(State_None)) {
-				token.state  = ref(State_Text);
-				token.u.text = HeapString(128);
+				token.state = ref(State_Text);
+				token.text  = HeapString(128);
 			}
 
-			String_Append(&token.u.text, cur);
+			String_Append(&token.text, cur);
 		}
 
 		prev = cur;
