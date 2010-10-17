@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 	try(&exc) {
 		Application_Process(app);
-	} catchAny(e) {
+	} clean catchAny(e) {
 		Exception_Print(e);
 
 #if Exception_SaveTrace
