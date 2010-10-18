@@ -527,13 +527,8 @@ def(void, Process) {
 		call(Scan);
 	}
 
-	struct {
-		Output output;
-		Parser parser;
-	} private;
-
-	OutputInstance output = Output_FromObject(&private.output);
-	ParserInstance parser = Parser_FromObject(&private.parser);
+	OutputInstance output = Output_NewStack();
+	ParserInstance parser = Parser_NewStack();
 
 	Output_Init(output, this->out, this->itf);
 	Output_SetClassName(output, this->name);

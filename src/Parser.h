@@ -39,6 +39,8 @@ class(self) {
 	char proceedChar;
 };
 
+ExtendClass(self);
+
 def(void, Init, StreamInterface *stream, void *context);
 void ref(DestroyToken)(ref(Token) *token);
 def(ref(Token), Fetch);

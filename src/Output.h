@@ -18,6 +18,8 @@ class(self) {
 	String className;
 };
 
+ExtendClass(self);
+
 def(void, Init, String file, bool itf);
 def(void, Destroy);
 def(void, WriteString, String s);

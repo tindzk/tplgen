@@ -16,7 +16,7 @@
 
 extern size_t Modules_Application;
 
-class(ref(TemplateItem)) {
+record(ref(TemplateItem)) {
 	String name;
 	String file;
 };
@@ -32,6 +32,8 @@ class(self) {
 
 	Array(ref(TemplateItem), *files);
 };
+
+ExtendClass(self);
 
 void Application0(void);
 

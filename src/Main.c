@@ -38,11 +38,7 @@ int main(int argc, char **argv) {
 		return ExitStatus_Failure;
 	}
 
-	struct {
-		Application app;
-	} private;
-
-	ApplicationInstance app = Application_FromObject(&private.app);
+	ApplicationInstance app = Application_NewStack();
 	Application_Init(app);
 
 	for (size_t i = 1; i < (size_t) argc; i++) {
