@@ -3,12 +3,6 @@
 
 extern ExceptionManager exc;
 
-size_t Modules_Method;
-
-void Method0(void) {
-	Modules_Method = Module_Register(String("Method"));
-}
-
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 

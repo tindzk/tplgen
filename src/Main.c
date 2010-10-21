@@ -23,8 +23,6 @@ int main(int argc, char **argv) {
 	Memory0(&exc);
 	Directory0(&exc);
 
-	Application0();
-
 	Logger_Init(&logger, &OnLogMessage, NULL,
 		Logger_Level_Fatal |
 		Logger_Level_Crit  |
@@ -60,11 +58,11 @@ int main(int argc, char **argv) {
 
 	try(&exc) {
 		Application_Process(app);
-	} clean catchAny(e) {
-		Exception_Print(e);
+	} clean catchAny {
+		ExceptionManager_Print(&exc, e);
 
 #if Exception_SaveTrace
-		Backtrace_PrintTrace(e->trace, e->traceItems);
+		Backtrace_PrintTrace(exc.e.trace, exc.e.traceItems);
 #endif
 
 		excReturn ExitStatus_Failure;

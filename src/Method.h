@@ -8,8 +8,6 @@
 #undef self
 #define self Method
 
-extern size_t Modules_Method;
-
 class(ref(LineItem)) {
 	String line;
 	size_t indent;

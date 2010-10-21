@@ -6,6 +6,7 @@ mkdir -p build/{Jivai,tplgen}
 	build                        \
 	output=tplgen.bin            \
 	main=src/Main.c              \
+	manifest=Manifest.h          \
 	include=../Jivai/src         \
 	map=src:build/tplgen         \
 	map=../Jivai/src:build/Jivai \

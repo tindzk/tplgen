@@ -14,8 +14,6 @@
 #undef self
 #define self Application
 
-extern size_t Modules_Application;
-
 record(ref(TemplateItem)) {
 	String name;
 	String file;
@@ -34,8 +32,6 @@ class(self) {
 };
 
 ExtendClass(self);
-
-void Application0(void);
 
 def(void, Init);
 def(void, Destroy);

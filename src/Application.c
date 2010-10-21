@@ -4,12 +4,6 @@
 extern Logger logger;
 extern ExceptionManager exc;
 
-size_t Modules_Application;
-
-void Application0(void) {
-	Modules_Application = Module_Register(String("Application"));
-}
-
 def(void, Init) {
 	this->itf  = true;
 	this->dir  = HeapString(0);
