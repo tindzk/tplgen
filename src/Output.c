@@ -153,6 +153,11 @@ static def(void, WriteHeader, Method_List *methods) {
 	call(WriteHeaderString, this->className);
 	call(WriteHeaderString, String(".private.h\"\n\n"));
 
+	call(WriteHeaderString, String("#undef self\n"));
+	call(WriteHeaderString, String("#define self "));
+	call(WriteHeaderString, this->className);
+	call(WriteHeaderString, String("\n\n"));
+
 	if (this->itf) {
 		call(WriteHeaderString, String("TemplateInterface Templates_"));
 		call(WriteHeaderString, this->className);
