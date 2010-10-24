@@ -1,6 +1,6 @@
 #import <String.h>
 #import <Signal.h>
-#import <ExceptionManager.h>
+#import <Exception.h>
 
 #import "Article.h"
 #import "Template.h"
