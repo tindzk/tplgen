@@ -1,95 +1,122 @@
 #import "Output.h"
 #import <App.h>
 
+static def(void, Open, String path, File *file, BufferedStream *stream) {
+	File_Open(file, path,
+		FileStatus_Create    |
+		FileStatus_Truncate  |
+		FileStatus_WriteOnly);
+
+	BufferedStream_Init(stream, &FileStream_Methods, file);
+	BufferedStream_SetOutputBuffer(stream, 4096);
+}
+
 def(void, Init, String file, bool itf) {
 	this->itf = itf;
-
 	this->className = HeapString(0);
 
-	File_Open(&this->file, file,
-		FileStatus_Create    |
-		FileStatus_WriteOnly |
-		FileStatus_Truncate);
+	String src = String_Concat(file, String(".c"));
+	String hdr = String_Concat(file, String(".h"));
 
-	BufferedStream_Init(&this->output, &FileStream_Methods, &this->file);
-	BufferedStream_SetOutputBuffer(&this->output, 4096);
+	call(Open, src, &this->srcFile, &this->src);
+	call(Open, hdr, &this->hdrFile, &this->hdr);
+
+	String_Destroy(&hdr);
+	String_Destroy(&src);
 }
 
 def(void, Destroy) {
 	String_Destroy(&this->className);
 
-	BufferedStream_Close(&this->output);
-	BufferedStream_Destroy(&this->output);
+	BufferedStream_Close(&this->src);
+	BufferedStream_Close(&this->hdr);
+
+	BufferedStream_Destroy(&this->src);
+	BufferedStream_Destroy(&this->hdr);
 }
 
-def(void, WriteString, String s) {
-	BufferedStream_Write(&this->output, s.buf, s.len);
+static def(void, WriteSourceString, String s) {
+	BufferedStream_Write(&this->src, s.buf, s.len);
+}
+
+static def(void, WriteHeaderString, String s) {
+	BufferedStream_Write(&this->hdr, s.buf, s.len);
 }
 
 def(void, SetClassName, String s) {
 	String_Copy(&this->className, s);
 }
 
-def(void, Write, Method_List *methods) {
-	call(WriteString, String(
-		"/* "
-			"Warning: This file is auto-generated. "
-		"*/"
-		"\n"
-		"\n"));
+static def(void, WriteDeclaration, Method *method, bool src) {
+	String res = HeapString(0);
 
-	call(WriteString, String("#import \""));
-	call(WriteString, this->className);
-	call(WriteString, String(".h\"\n\n"));
+	if (method->hidden) {
+		String_Append(&res, String("static "));
+	}
+
+	String_Append(&res, String("void "));
+
+	if (!method->block) {
+		String_Append(&res, this->className);
+		String_Append(&res, String("_"));
+	}
+
+	String_Append(&res, method->name);
+	String_Append(&res, String("("));
+
+	if (method->block) {
+		String_Append(&res, method->params);
+
+		if (method->params.len > 0) {
+			String_Append(&res, String(", "));
+		}
+	} else {
+		String_Append(&res, method->name);
+		String_Append(&res, String("Template *this, "));
+	}
+
+	String_Append(&res, String("String *res)"));
+
+	if (src) {
+		call(WriteSourceString, res);
+	} else {
+		call(WriteHeaderString, res);
+	}
+
+	String_Destroy(&res);
+}
+
+static def(void, WriteSource, Method_List *methods) {
+	call(WriteSourceString, Output_Warning);
+
+	call(WriteSourceString, String("#import \""));
+	call(WriteSourceString, this->className);
+	call(WriteSourceString, String(".h\"\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
 	DoublyLinkedList_ReverseForeach(methods, node) {
 		Method *method = Method_GetObject(node->method);
 
-		if (method->hidden) {
-			call(WriteString, String("static "));
-		}
-
-		call(WriteString, String("void "));
-
-		if (!method->block) {
-			call(WriteString, this->className);
-			call(WriteString, String("_"));
-		}
-
-		call(WriteString, method->name);
-		call(WriteString, String("("));
-
-		if (method->block) {
-			call(WriteString, method->params);
-
-			if (method->params.len > 0) {
-				call(WriteString, String(", "));
-			}
-		} else {
-			call(WriteString, method->name);
-			call(WriteString, String("Template *this, "));
-		}
-
-		call(WriteString, String("String *res) {\n"));
+		call(WriteDeclaration, method, true);
+		call(WriteSourceString, String(" {\n"));
 
 		LinkedList_Foreach(&method->lines, lineNode) {
 			for (size_t i = 0; i <= lineNode->indent; i++) {
-				call(WriteString, String("\t"));
+				call(WriteSourceString, String("\t"));
 			}
 
-			call(WriteString, lineNode->line);
-			call(WriteString, String("\n"));
+			call(WriteSourceString, lineNode->line);
+			call(WriteSourceString, String("\n"));
 		}
 
-		call(WriteString, String("}\n\n"));
+		call(WriteSourceString, String("}\n\n"));
 	}
 
 	if (this->itf) {
-		call(WriteString, String("TemplateInterface Templates_"));
-		call(WriteString, this->className);
-		call(WriteString, String(" = {\n"));
+		call(WriteSourceString, String("TemplateInterface Templates_"));
+		call(WriteSourceString, this->className);
+		call(WriteSourceString, String(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
 			Method *method = Method_GetObject(node->method);
@@ -101,19 +128,46 @@ def(void, Write, Method_List *methods) {
 			String name = String_Clone(method->name);
 			name.buf[0] = (char) Char_ToLower(name.buf[0]);
 
-			call(WriteString, String("\t."));
-			call(WriteString, name);
-			call(WriteString, String(" = &"));
-			call(WriteString, this->className);
-			call(WriteString, String("_"));
-			call(WriteString, method->name);
-			call(WriteString, String(",\n"));
+			call(WriteSourceString, String("\t."));
+			call(WriteSourceString, name);
+			call(WriteSourceString, String(" = &"));
+			call(WriteSourceString, this->className);
+			call(WriteSourceString, String("_"));
+			call(WriteSourceString, method->name);
+			call(WriteSourceString, String(",\n"));
 
 			String_Destroy(&name);
 		}
 
-		call(WriteString, String("};"));
+		call(WriteSourceString, String("};"));
 	}
+}
 
-	BufferedStream_Flush(&this->output);
+static def(void, WriteHeader, Method_List *methods) {
+	call(WriteHeaderString, Output_Warning);
+
+	call(WriteHeaderString, String("#import <String.h>\n"));
+	call(WriteHeaderString, String("#import <Integer.h>\n\n"));
+
+	call(WriteHeaderString, String("#import \""));
+	call(WriteHeaderString, this->className);
+	call(WriteHeaderString, String(".private.h\"\n\n"));
+
+	if (this->itf) {
+		call(WriteHeaderString, String("TemplateInterface Templates_"));
+		call(WriteHeaderString, this->className);
+		call(WriteHeaderString, String(";"));
+	} else {
+		DoublyLinkedList_ReverseForeach(methods, node) {
+			Method *method = Method_GetObject(node->method);
+
+			call(WriteDeclaration, method, false);
+			call(WriteHeaderString, String(";\n"));
+		}
+	}
+}
+
+def(void, Write, Method_List *methods) {
+	call(WriteHeader, methods);
+	call(WriteSource, methods);
 }
