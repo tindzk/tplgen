@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
 		return ExitStatus_Failure;
 	}
 
-	ApplicationInstance app = Application_NewStack();
-	Application_Init(app);
+	Application app;
+	Application_Init(&app);
 
 	for (size_t i = 1; i < (size_t) argc; i++) {
 		String arg = String_FromNul(argv[i]);
@@ -51,13 +51,13 @@ int main(int argc, char **argv) {
 		String name  = String_Slice(arg, 0, pos);
 		String value = String_Slice(arg, pos + 1);
 
-		if (!Application_SetOption(app, name, value)) {
+		if (!Application_SetOption(&app, name, value)) {
 			return ExitStatus_Failure;
 		}
 	}
 
 	try(&exc) {
-		Application_Process(app);
+		Application_Process(&app);
 	} clean catchAny {
 		ExceptionManager_Print(&exc, e);
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
 		excReturn ExitStatus_Failure;
 	} finally {
-		Application_Destroy(app);
+		Application_Destroy(&app);
 	} tryEnd;
 
 	return ExitStatus_Success;

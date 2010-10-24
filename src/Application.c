@@ -521,11 +521,9 @@ def(void, Process) {
 		call(Scan);
 	}
 
-	OutputInstance output = Output_NewStack();
-	ParserInstance parser = Parser_NewStack();
-
-	Output_Init(output, this->out, this->itf);
-	Output_SetClassName(output, this->name);
+	Output output;
+	Output_Init(&output, this->out, this->itf);
+	Output_SetClassName(&output, this->name);
 
 	for (size_t i = 0; i < this->files->len; i++) {
 		Logger_Info(&logger, String("Processing %..."),
@@ -539,16 +537,16 @@ def(void, Process) {
 		BufferedStream_Init(&stream, &FileStream_Methods, &tplFile);
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);
 
-		Parser_Init(parser, &BufferedStream_Methods, &stream);
+		Parser parser;
+		Parser_Init(&parser, &BufferedStream_Methods, &stream);
 
 		MethodInstance method = call(NewMethod, this->files->buf[i].name);
-		call(ParseTemplate, parser, false, method);
+		call(ParseTemplate, &parser, false, method);
 
 		BufferedStream_Close(&stream);
 		BufferedStream_Destroy(&stream);
 	}
 
-	Output_Write(output, &this->methods);
-
-	Output_Destroy(output);
+	Output_Write(&output, &this->methods);
+	Output_Destroy(&output);
 }
