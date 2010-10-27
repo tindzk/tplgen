@@ -1,9 +1,9 @@
 #import "Article.h"
 
-typedef struct {
+tpl(Article) {
 	Article article;
-} ArticleTemplate;
+};
 
-typedef struct {
+tpl(Listing) {
 	Articles *articles;
-} ListingTemplate;
+};

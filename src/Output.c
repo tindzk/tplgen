@@ -72,7 +72,7 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 		}
 	} else {
 		String_Append(&res, method->name);
-		String_Append(&res, String("Template *this, "));
+		String_Append(&res, String("TemplateInstance $this, "));
 	}
 
 	String_Append(&res, String("String *res)"));
@@ -91,7 +91,8 @@ static def(void, WriteSource, Method_List *methods) {
 
 	call(WriteSourceString, String("#import \""));
 	call(WriteSourceString, this->className);
-	call(WriteSourceString, String(".h\"\n\n"));
+	call(WriteSourceString, String(".h\"\n"));
+	call(WriteSourceString, String("#import <App.h>\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
@@ -147,7 +148,8 @@ static def(void, WriteHeader, Method_List *methods) {
 	call(WriteHeaderString, Output_Warning);
 
 	call(WriteHeaderString, String("#import <String.h>\n"));
-	call(WriteHeaderString, String("#import <Integer.h>\n\n"));
+	call(WriteHeaderString, String("#import <Integer.h>\n"));
+	call(WriteHeaderString, String("#import <Template.h>\n\n"));
 
 	call(WriteHeaderString, String("#import \""));
 	call(WriteHeaderString, this->className);

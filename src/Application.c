@@ -106,8 +106,7 @@ static def(void, HandlePrintVariable, MethodInstance method, String s, bool isIn
 
 static def(void, HandleTemplate, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
-	String line = String_Format(String("%.render(%.context, res);"),
-		var, var);
+	String line = String_Format(String("callback(%, res);"), var);
 
 	Method_AddLine(method, line);
 

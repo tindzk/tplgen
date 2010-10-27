@@ -14,6 +14,7 @@ mkdir -p build/Jivai
 	output=Main.bin                 \
 	main=src/Main.c                 \
 	manifest=Manifest.h             \
+	include=../include              \
 	include=../../Jivai/src         \
 	map=src:build                   \
 	map=../../Jivai/src:build/Jivai \
