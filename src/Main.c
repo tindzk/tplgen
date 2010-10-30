@@ -8,7 +8,7 @@ Logger logger;
 ExceptionManager exc;
 
 void OnLogMessage(__unused void *ptr, String msg, Logger_Level level, String file, int line) {
-	String slevel = Logger_LevelToString(level);
+	String slevel = Logger_ResolveLevel(level);
 	String sline  = Integer_ToString(line);
 
 	String_FmtPrint(String("[%] % (%:%)\n"),
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 	Memory0(&exc);
 	Directory0(&exc);
 
-	Logger_Init(&logger, &OnLogMessage, NULL,
+	Logger_Init(&logger, Callback(NULL, &OnLogMessage),
 		Logger_Level_Fatal |
 		Logger_Level_Crit  |
 		Logger_Level_Error |
