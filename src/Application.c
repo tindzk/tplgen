@@ -372,10 +372,10 @@ static def(MethodInstance, NewMethod, String name) {
 	return method;
 }
 
-static def(MethodInstance, NewBlockMethod, String name, String params) {
+static def(MethodInstance, NewBlockMethod, String name, String params, bool public) {
 	MethodInstance method = Method_New();
 
-	Method_Init(method, name, true);
+	Method_Init(method, name, !public);
 
 	Method_SetBlock(method, true);
 	Method_SetParameters(method, params);
@@ -457,8 +457,15 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 					blkparams = call(FormatVariables, blkparams);
 				}
 
+				String tmp;
+				bool public = String_BeginsWith(blkname, tmp = $("public "));
+
+				if (public) {
+					blkname = String_Slice(blkname, tmp.len);
+				}
+
 				MethodInstance blockMethod =
-					call(NewBlockMethod, blkname, blkparams);
+					call(NewBlockMethod, blkname, blkparams, public);
 				call(ParseTemplate, parser, true, blockMethod);
 
 				String_Destroy(&blkparams);
