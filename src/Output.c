@@ -99,19 +99,22 @@ static def(void, WriteSource, Method_List *methods) {
 	DoublyLinkedList_ReverseForeach(methods, node) {
 		Method *method = Method_GetObject(node->method);
 
-		call(WriteDeclaration, method, true);
-		call(WriteSourceString, String(" {\n"));
+		/* Omit empty methods. */
+		if (method->lines.first != NULL) {
+			call(WriteDeclaration, method, true);
+			call(WriteSourceString, String(" {\n"));
 
-		LinkedList_Foreach(&method->lines, lineNode) {
-			for (size_t i = 0; i <= lineNode->indent; i++) {
-				call(WriteSourceString, String("\t"));
+			LinkedList_Foreach(&method->lines, lineNode) {
+				for (size_t i = 0; i <= lineNode->indent; i++) {
+					call(WriteSourceString, String("\t"));
+				}
+
+				call(WriteSourceString, lineNode->line);
+				call(WriteSourceString, String("\n"));
 			}
 
-			call(WriteSourceString, lineNode->line);
-			call(WriteSourceString, String("\n"));
+			call(WriteSourceString, String("}\n\n"));
 		}
-
-		call(WriteSourceString, String("}\n\n"));
 	}
 
 	if (this->itf) {
@@ -168,8 +171,10 @@ static def(void, WriteHeader, Method_List *methods) {
 		DoublyLinkedList_ReverseForeach(methods, node) {
 			Method *method = Method_GetObject(node->method);
 
-			call(WriteDeclaration, method, false);
-			call(WriteHeaderString, String(";\n"));
+			if (method->lines.first != NULL) {
+				call(WriteDeclaration, method, false);
+				call(WriteHeaderString, String(";\n"));
+			}
 		}
 	}
 }

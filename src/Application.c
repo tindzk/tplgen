@@ -320,6 +320,10 @@ static def(String, EscapeLine, String s) {
 }
 
 static def(void, FlushBuf, MethodInstance method, String s) {
+	if (s.len == 0) {
+		return;
+	}
+
 	bool flushed = false;
 
 	StringArray *items = String_Split(s, '\n');
@@ -422,7 +426,8 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 			next = Parser_Fetch(parser);
 
 			if ((next.state == Parser_State_Command && call(EndsCommandBlock, next.cmd.name))
-			  || next.state == Parser_State_Block)
+			  || next.state == Parser_State_Block
+			  || next.state == Parser_State_None)
 			{
 				text = String_Trim(text, String_TrimRight);
 			}
