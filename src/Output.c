@@ -7,7 +7,7 @@ static def(void, Open, String path, File *file, BufferedStream *stream) {
 		FileStatus_Truncate  |
 		FileStatus_WriteOnly);
 
-	BufferedStream_Init(stream, &FileStream_Methods, file);
+	BufferedStream_Init(stream, &FileStreamImpl, file);
 	BufferedStream_SetOutputBuffer(stream, 4096);
 }
 
