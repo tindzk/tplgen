@@ -28,10 +28,10 @@ def(void, Destroy) {
 		Memory_Free(item);
 	});
 
-	Array_Foreach(this->files, ^(ref(TemplateItem) *item) {
-		String_Destroy(&item->name);
-		String_Destroy(&item->file);
-	});
+	foreach (file, this->files) {
+		String_Destroy(&file->name);
+		String_Destroy(&file->file);
+	}
 
 	Array_Destroy(this->files);
 }
