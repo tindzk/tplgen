@@ -182,7 +182,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 
 	String iter   = call(FormatVariables, parts->buf[0]);
 	String option = parts->buf[1];
-	String from   = parts->buf[2];
+	String from   = call(FormatVariables, parts->buf[2]);
 
 	if (!String_Equals(option, String("in"))) {
 		Logger_Error(&logger, String("For loops don't support '%'"),
@@ -200,23 +200,23 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		String upper = String_Slice(from, pos + 2);
 
 		String line = String_Format(
-			String("for (int % = %; i <= %; i++) {"),
-				iter, lower, upper);
+			String("for (int % = %; % <= %; %++) {"),
+				iter, lower,
+				iter, upper,
+				iter);
 
 		Method_AddLine(method, line);
 		Method_Indent(method);
 
 		String_Destroy(&line);
 	} else {
-		String var = call(FormatVariables, from);
-
 		String line1 = String_Format(
 			String("for (size_t i = 0; i < %->len; i++) {"),
-			var);
+			from);
 
 		String line2 = String_Format(
 			String("typeof(%->buf[0]) % = %->buf[i];"),
-			var, iter, var);
+			from, iter, from);
 
 		Method_AddLine(method, line1);
 		Method_Indent(method);
@@ -225,9 +225,9 @@ static def(void, HandleFor, MethodInstance method, String params) {
 
 		String_Destroy(&line2);
 		String_Destroy(&line1);
-		String_Destroy(&var);
 	}
 
+	String_Destroy(&from);
 	String_Destroy(&iter);
 	Array_Destroy(parts);
 }
