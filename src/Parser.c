@@ -53,7 +53,7 @@ static def(void, ParseCommand, ref(Token) *token) {
 		token->cmd.params = String_Clone(String_Slice(buf, pos + 1));
 	} else {
 		token->cmd.name   = String_Clone(String_Slice(buf, 0));
-		token->cmd.params = String("");
+		token->cmd.params = HeapString(0);
 	}
 
 	String_Destroy(&buf);
