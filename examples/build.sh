@@ -7,7 +7,7 @@ mkdir -p build/Jivai
 	dir=tpl             \
 	ext=.html           \
 	itf=no              \
-	out=src/Template
+	out=src/Template || exit 1
 
 ../../Jivai-Utils/jutils.bin        \
 	build                           \

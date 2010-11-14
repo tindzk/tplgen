@@ -1,5 +1,4 @@
 #import <String.h>
-#import <Signal.h>
 #import <Exception.h>
 
 #import "Article.h"
@@ -26,7 +25,6 @@ int main(__unused int argc, __unused char *argv[]) {
 
 	Memory0(&exc);
 	String0(&exc);
-	Signal0(&exc);
 
 	Articles *articles;
 
@@ -42,7 +40,7 @@ int main(__unused int argc, __unused char *argv[]) {
 	printListing(&res, articles);
 	String_Print(res);
 
-	String_Print(String("\n"));
+	String_Print(String("\n\n"));
 	res.len = 0;
 
 	String_Print(String("Article template:\n"));

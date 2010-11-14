@@ -81,27 +81,17 @@ static def(String, FormatVariables, String s) {
 	return tmp;
 }
 
-static def(void, HandlePrintVariable, MethodInstance method, String s, bool isInt) {
-	String line = HeapString(s.len);
-	String_Append(&line, String("String_Append(res, "));
+static def(void, HandlePrintVariable, MethodInstance method, String s, String s2) {
+	String var  = call(FormatVariables, s);
+	String var2 = call(FormatVariables, s2);
 
-	if (isInt) {
-		String_Append(&line, String("Integer_ToString("));
-	}
-
-	String var = call(FormatVariables, s);
-	String_Append(&line, var);
-	String_Destroy(&var);
-
-	if (isInt) {
-		String_Append(&line, String(")"));
-	}
-
-	String_Append(&line, String(");"));
-
+	String line = String_Format($("Template_Print(%%, res);"),
+		var, var2);
 	Method_AddLine(method, line);
-
 	String_Destroy(&line);
+
+	String_Destroy(&var2);
+	String_Destroy(&var);
 }
 
 static def(void, HandleTemplate, MethodInstance method, String s) {
@@ -242,43 +232,24 @@ static def(void, HandleFor, MethodInstance method, String params) {
 	Array_Destroy(parts);
 }
 
-static def(void, HandlePass, MethodInstance method, String params) {
-	String fmt;
-	ssize_t pos = String_Find(params, ' ');
+static def(void, HandlePass, MethodInstance method, String name, String params) {
+	String vars = call(FormatVariables, params);
 
-	if (pos == String_NotFound) {
-		fmt = String_Format(String(
-			"{ "
-				"String tmp = %(); "
-				"String_Append(res, tmp); "
-				"if (tmp.mutable) String_Destroy(&tmp); "
-			"}"),
+	String line = String_Format($("Template_Print(%(%), res);"),
+		String_Slice(name, 1),
+		vars);
 
-			params);
-	} else {
-		String var = call(FormatVariables, String_Slice(params, pos + 1));
+	Method_AddLine(method, line);
+	String_Destroy(&line);
 
-		fmt = String_Format(String(
-			"{ "
-				"String tmp = %(%); "
-				"String_Append(res, tmp); "
-				"if (tmp.mutable) String_Destroy(&tmp); "
-			"}"),
-
-			String_Slice(params, 0, pos),
-			var);
-
-		String_Destroy(&var);
-	}
-
-	Method_AddLine(method, fmt);
-
-	String_Destroy(&fmt);
+	String_Destroy(&vars);
 }
 
 static def(void, HandleCommand, MethodInstance method, String name, String params) {
 	if (name.buf[0] == '$' || name.buf[0] == '#') {
-		call(HandlePrintVariable, method, name, false);
+		call(HandlePrintVariable, method, name, params);
+	} else if (name.buf[0] == '~') {
+		call(HandlePass, method, name, params);
 	} else if (String_Equals(name, String("for"))) {
 		call(HandleFor, method, params);
 	} else if (String_Equals(name, String("if"))) {
@@ -291,12 +262,8 @@ static def(void, HandleCommand, MethodInstance method, String name, String param
 		call(HandleEnd, method);
 	} else if (String_Equals(name, String("block"))) {
 		call(HandleBlock, method, params);
-	} else if (String_Equals(name, String("int"))) {
-		call(HandlePrintVariable, method, params, true);
 	} else if (String_Equals(name, String("tpl"))) {
 		call(HandleTemplate, method, params);
-	} else if (String_Equals(name, String("pass"))) {
-		call(HandlePass, method, params);
 	} else {
 		Logger_Error(&logger, String("Command '%' is unknown."),
 			name);
