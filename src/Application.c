@@ -251,7 +251,7 @@ static def(void, HandlePass, MethodInstance method, String params) {
 			"{ "
 				"String tmp = %(); "
 				"String_Append(res, tmp); "
-				"String_Destroy(&tmp); "
+				"if (tmp.mutable) String_Destroy(&tmp); "
 			"}"),
 
 			params);
@@ -262,7 +262,7 @@ static def(void, HandlePass, MethodInstance method, String params) {
 			"{ "
 				"String tmp = %(%); "
 				"String_Append(res, tmp); "
-				"String_Destroy(&tmp); "
+				"if (tmp.mutable) String_Destroy(&tmp); "
 			"}"),
 
 			String_Slice(params, 0, pos),
