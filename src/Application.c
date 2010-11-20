@@ -200,10 +200,8 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		String upper = String_Slice(from, pos + 2);
 
 		String line = String_Format(
-			String("for (int % = %; % <= %; %++) {"),
-				iter, lower,
-				iter, upper,
-				iter);
+			String("range (%, %, %) {"),
+			iter, lower, upper);
 
 		Method_AddLine(method, line);
 		Method_Indent(method);
@@ -211,7 +209,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		String_Destroy(&line);
 	} else {
 		String line1 = String_Format(
-			String("for (size_t i = 0; i < %->len; i++) {"),
+			String("forward (i, %->len) {"),
 			from);
 
 		String line2 = String_Format(
