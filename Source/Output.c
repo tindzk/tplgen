@@ -152,7 +152,7 @@ static def(void, WriteHeader, Method_List *methods) {
 
 	call(WriteHeaderString, String("#import <String.h>\n"));
 	call(WriteHeaderString, String("#import <Integer.h>\n"));
-	call(WriteHeaderString, String("#import <Template.h>\n\n"));
+	call(WriteHeaderString, String("#import <tplgen/Template.h>\n\n"));
 
 	call(WriteHeaderString, String("#import \""));
 	call(WriteHeaderString, this->className);

@@ -505,7 +505,7 @@ def(void, Process) {
 		Logger_Info(&logger, String("Processing %..."),
 			this->files->buf[i].file);
 
-		FileStream tplFile;
+		File tplFile;
 		FileStream_Open(&tplFile, this->files->buf[i].file,
 			FileStatus_ReadOnly);
 

@@ -1,24 +1,24 @@
 #!/bin/sh
 
-mkdir -p build/Jivai
+mkdir -p Build/Jivai
 
 ../../tplgen/tplgen.bin \
 	name=Template       \
-	dir=tpl             \
+	dir=Templates       \
 	ext=.html           \
 	itf=no              \
-	out=src/Template || exit 1
+	out=Source/Template || exit 1
 
 ../../Jivai-Utils/jutils.bin        \
 	build                           \
 	output=Main.bin                 \
-	main=src/Main.c                 \
+	main=Source/Main.c              \
 	manifest=Manifest.h             \
-	include=../include              \
+	include=../..                   \
 	include=../../Jivai/src         \
-	map=src:build                   \
-	map=../../Jivai/src:build/Jivai \
+	map=Source:Build                \
+	map=../../Jivai/src:Build/Jivai \
 	optimlevel=0                    \
 	dbgsym=yes                      \
-	inclhdr=config.h                \
+	inclhdr=Config.h                \
 	link=@bfd

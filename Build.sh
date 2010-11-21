@@ -1,16 +1,16 @@
 #!/bin/sh
 
-mkdir -p build/{Jivai,tplgen}
+mkdir -p Build/{tplgen,Jivai}
 
 ../Jivai-Utils/jutils.bin        \
 	build                        \
 	output=tplgen.bin            \
-	main=src/Main.c              \
+	main=Source/Main.c           \
 	manifest=Manifest.h          \
 	include=../Jivai/src         \
-	map=src:build/tplgen         \
-	map=../Jivai/src:build/Jivai \
+	map=Source:Build/tplgen      \
+	map=../Jivai/src:Build/Jivai \
 	optimlevel=0                 \
 	dbgsym=yes                   \
-	inclhdr=config.h             \
+	inclhdr=Config.h             \
 	link=@bfd
