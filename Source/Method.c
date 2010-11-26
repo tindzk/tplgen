@@ -1,8 +1,6 @@
 #import "Method.h"
 #import <App.h>
 
-extern ExceptionManager exc;
-
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 
@@ -46,7 +44,7 @@ inline def(void, Indent) {
 
 inline def(void, Unindent) {
 	if (this->indent == 0) {
-		throw(&exc, excInvalidDepth);
+		throw(excInvalidDepth);
 	}
 
 	this->indent--;

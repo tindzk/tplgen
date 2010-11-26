@@ -16,13 +16,6 @@ void OnLogMessage(__unused void *ptr, String msg, Logger_Level level, String fil
 }
 
 int main(int argc, char **argv) {
-	ExceptionManager_Init(&exc);
-
-	File0(&exc);
-	String0(&exc);
-	Memory0(&exc);
-	Directory0(&exc);
-
 	Logger_Init(&logger, Callback(NULL, &OnLogMessage),
 		Logger_Level_Fatal |
 		Logger_Level_Crit  |
@@ -56,10 +49,10 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	try(&exc) {
+	try {
 		Application_Process(&app);
 	} clean catchAny {
-		ExceptionManager_Print(&exc, e);
+		Exception_Print(e);
 
 #if Exception_SaveTrace
 		Backtrace_PrintTrace(exc.e.trace, exc.e.traceItems);
