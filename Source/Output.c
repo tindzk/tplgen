@@ -1,5 +1,4 @@
 #import "Output.h"
-#import <App.h>
 
 static def(void, Open, String path, File *file, BufferedStream *stream) {
 	File_Open(file, path,
@@ -91,8 +90,7 @@ static def(void, WriteSource, Method_List *methods) {
 
 	call(WriteSourceString, String("#import \""));
 	call(WriteSourceString, this->className);
-	call(WriteSourceString, String(".h\"\n"));
-	call(WriteSourceString, String("#import <App.h>\n\n"));
+	call(WriteSourceString, String(".h\"\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
