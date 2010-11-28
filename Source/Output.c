@@ -71,7 +71,7 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 		}
 	} else {
 		String_Append(&res, method->name);
-		String_Append(&res, String("TemplateInstance $this, "));
+		String_Append(&res, String("Template *tpl, "));
 	}
 
 	String_Append(&res, String("String *res)"));

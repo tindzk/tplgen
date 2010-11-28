@@ -19,7 +19,7 @@ record(ref(TemplateItem)) {
 	String file;
 };
 
-class(self) {
+class {
 	bool itf;
 	String dir;
 	String ext;
@@ -30,8 +30,6 @@ class(self) {
 
 	Array(ref(TemplateItem), *files);
 };
-
-ExtendClass(self);
 
 def(void, Init);
 def(void, Destroy);

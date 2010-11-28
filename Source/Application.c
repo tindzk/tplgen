@@ -73,7 +73,7 @@ def(bool, SetOption, String name, String value) {
 static def(String, FormatVariables, String s) {
 	String tmp = String_Clone(s);
 
-	String_ReplaceAll(&tmp, String("#"), String("this->"));
+	String_ReplaceAll(&tmp, String("#"), String("tpl->"));
 	String_ReplaceAll(&tmp, String("$"), String(""));
 
 	return tmp;

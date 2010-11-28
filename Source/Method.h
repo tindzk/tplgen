@@ -8,7 +8,7 @@
 #undef self
 #define self Method
 
-class(ref(LineItem)) {
+record(ref(LineItem)) {
 	String line;
 	size_t indent;
 	LinkedList_DeclareRef(ref(LineItem));
@@ -16,7 +16,7 @@ class(ref(LineItem)) {
 
 LinkedList_DeclareList(ref(LineItem), ref(LineList));
 
-class(self) {
+class {
 	bool block;
 	bool hidden;
 
@@ -28,9 +28,9 @@ class(self) {
 	ref(LineList) lines;
 };
 
-ExtendClass(self);
+ExtendClass;
 
-class(ref(Item)) {
+record(ref(Item)) {
 	MethodInstance method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 };

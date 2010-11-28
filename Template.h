@@ -1,12 +1,13 @@
 #import <Date.h>
 #import <String.h>
 #import <Macros.h>
+#import <Date/RFC822.h>
 #import <HTML/Entities.h>
 
 DefineCallback(Template, void, String *);
 
 #define tpl(name) \
-	class(simpleConcat(name, Template))
+	record(simpleConcat(name, Template))
 
 #define Template(meth, obj)       \
 	(Template) Callback(          \
@@ -15,6 +16,12 @@ DefineCallback(Template, void, String *);
 
 static inline void Template_PrintDate(Date date, String *res) {
 	String s = Date_Format(date);
+	String_Append(res, s);
+	String_Destroy(&s);
+}
+
+static inline void Template_PrintRFC822(Date_RFC822 date, String *res) {
+	String s = Date_RFC822_ToString(date);
 	String_Append(res, s);
 	String_Destroy(&s);
 }
@@ -31,6 +38,10 @@ static inline void Template_PrintLiteral(String s, String *res) {
 
 static inline overload void Template_Print(Date date, String *res) {
 	Template_PrintDate(date, res);
+}
+
+static inline overload void Template_Print(Date_RFC822 date, String *res) {
+	Template_PrintRFC822(date, res);
 }
 
 static inline overload void Template_Print(String s, String *res) {

@@ -16,7 +16,7 @@
 	"\n"                                         \
 	"\n")
 
-class(self) {
+class {
 	bool itf;
 	String className;
 
@@ -26,8 +26,6 @@ class(self) {
 	File hdrFile;
 	BufferedStream hdr;
 };
-
-ExtendClass(self);
 
 def(void, Init, String file, bool itf);
 def(void, Destroy);

@@ -4,8 +4,6 @@
 #import "Article.h"
 #import "Template.h"
 
-ExceptionManager exc;
-
 void printListing(String *out, Articles *articles) {
 	ListingTemplate tpl;
 	tpl.articles = articles;
@@ -21,33 +19,28 @@ void printArticle(String *out, Article article) {
 }
 
 int main(__unused int argc, __unused char *argv[]) {
-	ExceptionManager_Init(&exc);
-
-	Memory0(&exc);
-	String0(&exc);
-
 	Articles *articles;
 
 	Array_Init(articles, 3);
 
-	Array_Push(articles, Article(0, String("First article")));
-	Array_Push(articles, Article(1, String("Second article")));
-	Array_Push(articles, Article(2, String("Third article")));
+	Array_Push(articles, Article(0, $("First article")));
+	Array_Push(articles, Article(1, $("Second article")));
+	Array_Push(articles, Article(2, $("Third article")));
 
 	String res = HeapString(0);
 
-	String_Print(String("Listing template:\n"));
+	String_Print($("Listing template:\n"));
 	printListing(&res, articles);
 	String_Print(res);
 
-	String_Print(String("\n\n"));
+	String_Print($("\n\n"));
 	res.len = 0;
 
-	String_Print(String("Article template:\n"));
+	String_Print($("Article template:\n"));
 	printArticle(&res, articles->buf[1]);
 	String_Print(res);
 
-	String_Print(String("\n"));
+	String_Print($("\n"));
 
 	Array_Destroy(articles);
 	String_Destroy(&res);
