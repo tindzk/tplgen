@@ -1,18 +1,17 @@
 #import <String.h>
 #import <Logger.h>
+#import <Integer.h>
 #import <Exception.h>
 
 #import "Application.h"
 
 Logger logger;
-ExceptionManager exc;
 
 void OnLogMessage(__unused void *ptr, String msg, Logger_Level level, String file, int line) {
 	String slevel = Logger_ResolveLevel(level);
-	String sline  = Int32_ToString(line);
+	String sline  = Integer_ToString(line);
 
-	String_FmtPrint(String("[%] % (%:%)\n"),
-		slevel, msg, file, sline);
+	String_FmtPrint($("[%] % (%:%)\n"), slevel, msg, file, sline);
 }
 
 int main(int argc, char **argv) {
@@ -25,7 +24,7 @@ int main(int argc, char **argv) {
 		Logger_Level_Trace);
 
 	if (argc <= 1) {
-		Logger_Error(&logger, String("No parameters specified."));
+		Logger_Error(&logger, $("No parameters specified."));
 		return ExitStatus_Failure;
 	}
 
@@ -55,7 +54,7 @@ int main(int argc, char **argv) {
 		Exception_Print(e);
 
 #if Exception_SaveTrace
-		Backtrace_PrintTrace(exc.e.trace, exc.e.traceItems);
+		Backtrace_PrintTrace(__exc_mgr.e.trace, __exc_mgr.e.traceItems);
 #endif
 
 		excReturn ExitStatus_Failure;

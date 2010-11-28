@@ -12,5 +12,5 @@ mkdir -p Build/{tplgen,Jivai}
 	map=../Jivai/src:Build/Jivai \
 	optimlevel=0                 \
 	dbgsym=yes                   \
-	inclhdr=Config.h             \
+	inclhdr=../Jivai/config.h    \
 	link=@bfd
