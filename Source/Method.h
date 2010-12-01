@@ -5,7 +5,6 @@
 
 #import "Errors.h"
 
-#undef self
 #define self Method
 
 record(ref(LineItem)) {
@@ -44,3 +43,5 @@ def(void, Destroy);
 def(void, AddLine, String line);
 def(void, Indent);
 def(void, Unindent);
+
+#undef self

@@ -1,5 +1,7 @@
 #import "Application.h"
 
+#define self Application
+
 extern Logger logger;
 
 def(void, Init) {

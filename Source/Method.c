@@ -1,5 +1,7 @@
 #import "Method.h"
 
+#define self Method
+
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 

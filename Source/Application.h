@@ -11,7 +11,6 @@
 #import "Output.h"
 #import "Parser.h"
 
-#undef self
 #define self Application
 
 record(ref(TemplateItem)) {
@@ -35,3 +34,5 @@ def(void, Init);
 def(void, Destroy);
 def(bool, SetOption, String name, String value);
 def(void, Process);
+
+#undef self

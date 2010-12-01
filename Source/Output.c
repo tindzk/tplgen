@@ -1,5 +1,7 @@
 #import "Output.h"
 
+#define self Output
+
 static def(void, Open, String path, File *file, BufferedStream *stream) {
 	File_Open(file, path,
 		FileStatus_Create    |
@@ -92,6 +94,10 @@ static def(void, WriteSource, Method_List *methods) {
 	call(WriteSourceString, this->className);
 	call(WriteSourceString, String(".h\"\n\n"));
 
+	call(WriteSourceString, String("#define self "));
+	call(WriteSourceString, this->className);
+	call(WriteSourceString, String("\n\n"));
+
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
 	DoublyLinkedList_ReverseForeach(methods, node) {
@@ -156,7 +162,6 @@ static def(void, WriteHeader, Method_List *methods) {
 	call(WriteHeaderString, this->className);
 	call(WriteHeaderString, String(".private.h\"\n\n"));
 
-	call(WriteHeaderString, String("#undef self\n"));
 	call(WriteHeaderString, String("#define self "));
 	call(WriteHeaderString, this->className);
 	call(WriteHeaderString, String("\n\n"));
@@ -175,6 +180,8 @@ static def(void, WriteHeader, Method_List *methods) {
 			}
 		}
 	}
+
+	call(WriteHeaderString, String("\n#undef self\n"));
 }
 
 def(void, Write, Method_List *methods) {

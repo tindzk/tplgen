@@ -1,5 +1,7 @@
 #import "Parser.h"
 
+#define self Parser
+
 def(void, Init, StreamInterface *stream, void *context) {
 	this->stream  = stream;
 	this->context = context;

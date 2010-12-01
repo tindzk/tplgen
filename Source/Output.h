@@ -6,7 +6,6 @@
 
 #import "Method.h"
 
-#undef self
 #define self Output
 
 #define	Output_Warning String(                   \
@@ -31,3 +30,5 @@ def(void, Init, String file, bool itf);
 def(void, Destroy);
 def(void, SetClassName, String s);
 def(void, Write, Method_List *methods);
+
+#undef self

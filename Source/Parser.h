@@ -1,7 +1,6 @@
 #import <String.h>
 #import <StreamInterface.h>
 
-#undef self
 #define self Parser
 
 set(ref(State)) {
@@ -42,3 +41,5 @@ class {
 def(void, Init, StreamInterface *stream, void *context);
 void ref(DestroyToken)(ref(Token) *token);
 def(ref(Token), Fetch);
+
+#undef self
