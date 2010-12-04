@@ -19,13 +19,11 @@ void printArticle(String *out, Article article) {
 }
 
 int main(__unused int argc, __unused char *argv[]) {
-	Articles *articles;
+	Articles *articles = Articles_New(4);
 
-	Array_Init(articles, 3);
-
-	Array_Push(articles, Article(0, $("First article")));
-	Array_Push(articles, Article(1, $("Second article")));
-	Array_Push(articles, Article(2, $("Third article")));
+	Articles_Push(&articles, Article(0, $("First article")));
+	Articles_Push(&articles, Article(1, $("Second article")));
+	Articles_Push(&articles, Article(2, $("Third article")));
 
 	String res = HeapString(0);
 
@@ -42,7 +40,7 @@ int main(__unused int argc, __unused char *argv[]) {
 
 	String_Print($("\n"));
 
-	Array_Destroy(articles);
+	Articles_Free(articles);
 	String_Destroy(&res);
 
 	return ExitStatus_Success;

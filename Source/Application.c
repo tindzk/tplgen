@@ -5,13 +5,12 @@
 extern Logger logger;
 
 def(void, Init) {
-	this->itf  = true;
-	this->dir  = HeapString(0);
-	this->ext  = HeapString(0);
-	this->out  = HeapString(0);
-	this->name = HeapString(0);
-
-	Array_Init(this->files, 50);
+	this->itf   = true;
+	this->dir   = HeapString(0);
+	this->ext   = HeapString(0);
+	this->out   = HeapString(0);
+	this->name  = HeapString(0);
+	this->files = scall(TemplateArray_New, 50);
 
 	DoublyLinkedList_Init(&this->methods);
 }
@@ -33,7 +32,7 @@ def(void, Destroy) {
 		String_Destroy(&file->file);
 	}
 
-	Array_Destroy(this->files);
+	scall(TemplateArray_Free, this->files);
 }
 
 def(bool, SetOption, String name, String value) {
@@ -48,7 +47,7 @@ def(bool, SetOption, String name, String value) {
 			Logger_Error(&logger,
 				String("`add' requires two values separated by a colon."));
 
-			Array_Destroy(parts);
+			StringArray_Destroy(parts);
 
 			return false;
 		}
@@ -58,9 +57,9 @@ def(bool, SetOption, String name, String value) {
 		insert.name = String_Clone(parts->buf[0]);
 		insert.file = String_Clone(parts->buf[1]);
 
-		Array_Push(this->files, insert);
+		scall(TemplateArray_Push, &this->files, insert);
 
-		Array_Destroy(parts);
+		StringArray_Free(parts);
 	} else if (String_Equals(name, String("dir"))) {
 		String_Copy(&this->dir, value);
 	} else if (String_Equals(name, String("ext"))) {
@@ -227,7 +226,8 @@ static def(void, HandleFor, MethodInstance method, String params) {
 
 	String_Destroy(&from);
 	String_Destroy(&iter);
-	Array_Destroy(parts);
+
+	StringArray_Free(parts);
 }
 
 static def(void, HandlePass, MethodInstance method, String name, String params) {
@@ -324,7 +324,7 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 		Method_AddLine(method, String("));"));
 	}
 
-	Array_Destroy(items);
+	StringArray_Free(items);
 }
 
 static def(MethodInstance, NewMethod, String name) {
@@ -481,7 +481,7 @@ def(void, Scan) {
 
 		insert.file = String_Format(String("%/%"), this->dir, item.name);
 
-		Array_Push(this->files, insert);
+		scall(TemplateArray_Push, &this->files, insert);
 	}
 
 	Directory_Destroy(&dir);

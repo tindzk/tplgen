@@ -18,6 +18,8 @@ record(ref(TemplateItem)) {
 	String file;
 };
 
+Array(ref(TemplateItem), ref(TemplateArray));
+
 class {
 	bool itf;
 	String dir;
@@ -27,7 +29,7 @@ class {
 
 	Method_List methods;
 
-	Array(ref(TemplateItem), *files);
+	ref(TemplateArray) *files;
 };
 
 def(void, Init);
