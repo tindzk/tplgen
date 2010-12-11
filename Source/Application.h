@@ -6,12 +6,14 @@
 #import <Directory.h>
 #import <StreamInterface.h>
 
-#import "Errors.h"
 #import "Method.h"
 #import "Output.h"
 #import "Parser.h"
 
 #define self Application
+
+// @exc InvalidParameter
+// @exc ParsingFailed
 
 record(ref(TemplateItem)) {
 	String name;

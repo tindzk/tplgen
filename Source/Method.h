@@ -3,9 +3,9 @@
 #import <LinkedList.h>
 #import <DoublyLinkedList.h>
 
-#import "Errors.h"
-
 #define self Method
+
+// @exc InvalidDepth
 
 record(ref(LineItem)) {
 	String line;

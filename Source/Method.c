@@ -2,6 +2,8 @@
 
 #define self Method
 
+// @exc InvalidDepth
+
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 
@@ -45,7 +47,7 @@ inline def(void, Indent) {
 
 inline def(void, Unindent) {
 	if (this->indent == 0) {
-		throw(excInvalidDepth);
+		throw(InvalidDepth);
 	}
 
 	this->indent--;

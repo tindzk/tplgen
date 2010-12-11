@@ -176,7 +176,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 
 	if (parts->len < 3) {
 		Logger_Error(&logger, String("Incomplete for-loop."));
-		throw(excParsingFailed);
+		throw(ParsingFailed);
 	}
 
 	String iter   = call(FormatVariables, parts->buf[0]);
@@ -187,7 +187,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		Logger_Error(&logger, String("For loops don't support '%'"),
 			option);
 
-		throw(excParsingFailed);
+		throw(ParsingFailed);
 	}
 
 	ssize_t pos = String_Find(from, 0, String(".."));
@@ -266,7 +266,7 @@ static def(void, HandleCommand, MethodInstance method, String name, String param
 		Logger_Error(&logger, String("Command '%' is unknown."),
 			name);
 
-		throw(excParsingFailed);
+		throw(ParsingFailed);
 	}
 }
 
@@ -413,7 +413,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 						String("'%' not understood."),
 						cur.block);
 
-					throw(excParsingFailed);
+					throw(ParsingFailed);
 				}
 
 				ssize_t pos = String_Find(cur.block, String(": "));
@@ -490,7 +490,7 @@ def(void, Scan) {
 def(void, Process) {
 	if (this->out.len == 0) {
 		Logger_Error(&logger, String("No output path is set."));
-		throw(excInvalidParameter);
+		throw(InvalidParameter);
 	}
 
 	if (this->dir.len > 0) {
