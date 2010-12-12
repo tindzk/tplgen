@@ -1,15 +1,27 @@
 #import "Output.h"
 
+extern Logger logger;
+
 #define self Output
 
 static def(void, Open, String path, File *file, BufferedStream *stream) {
-	File_Open(file, path,
-		FileStatus_Create    |
-		FileStatus_Truncate  |
-		FileStatus_WriteOnly);
+	try {
+		File_Open(file, path,
+			FileStatus_Create    |
+			FileStatus_Truncate  |
+			FileStatus_WriteOnly);
 
-	BufferedStream_Init(stream, &FileStreamImpl, file);
-	BufferedStream_SetOutputBuffer(stream, 4096);
+		BufferedStream_Init(stream, &FileStreamImpl, file);
+		BufferedStream_SetOutputBuffer(stream, 4096);
+	} clean catchModule(File) {
+		Logger_Error(&logger,
+			$("Couldn't open file % for writing."),
+			path);
+
+		__exc_rethrow = true;
+	} finally {
+
+	} tryEnd;
 }
 
 def(void, Init, String file, bool itf) {

@@ -1,5 +1,6 @@
 #import <File.h>
 #import <String.h>
+#import <Logger.h>
 #import <FileStream.h>
 #import <LinkedList.h>
 #import <BufferedStream.h>
