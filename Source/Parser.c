@@ -2,9 +2,8 @@
 
 #define self Parser
 
-def(void, Init, StreamInterface *stream, void *context) {
+def(void, Init, Stream stream) {
 	this->stream  = stream;
-	this->context = context;
 
 	this->proceed     = false;
 	this->proceedChar = '\0';
@@ -37,8 +36,8 @@ static def(void, ParseCommand, ref(Token) *token) {
 
 	String buf = HeapString(64);
 
-	while (!this->stream->isEof(this->context)) {
-		this->stream->read(this->context, &cur, 1);
+	while (!delegate(this->stream, isEof)) {
+		delegate(this->stream, read, &cur, 1);
 
 		if (cur == '}') {
 			break;
@@ -65,8 +64,8 @@ static def(void, ParseBlock, ref(Token) *token) {
 
 	token->block = HeapString(64);
 
-	while (!this->stream->isEof(this->context)) {
-		this->stream->read(this->context, &cur, 1);
+	while (!delegate(this->stream, isEof)) {
+		delegate(this->stream, read, &cur, 1);
 
 		if (cur == ']') {
 			break;
@@ -91,8 +90,8 @@ def(ref(Token), Fetch) {
 		goto next;
 	}
 
-	while (!this->stream->isEof(this->context)) {
-		this->stream->read(this->context, &cur, 1);
+	while (!delegate(this->stream, isEof)) {
+		delegate(this->stream, read, &cur, 1);
 
 		if (cur == '{' || cur == '[' && prev != '\\') {
 			if (token.state != ref(State_None)) {

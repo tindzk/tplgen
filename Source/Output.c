@@ -11,7 +11,7 @@ static def(void, Open, String path, File *file, BufferedStream *stream) {
 			FileStatus_Truncate  |
 			FileStatus_WriteOnly);
 
-		BufferedStream_Init(stream, &FileStreamImpl, file);
+		BufferedStream_Init(stream, File_AsStream(file));
 		BufferedStream_SetOutputBuffer(stream, 4096);
 	} clean catchModule(File) {
 		Logger_Error(&logger,

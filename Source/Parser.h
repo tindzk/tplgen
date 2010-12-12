@@ -31,14 +31,13 @@ record(ref(Token)) {
 	}
 
 class {
-	StreamInterface *stream;
-	void *context;
+	Stream stream;
 
 	bool proceed;
 	char proceedChar;
 };
 
-def(void, Init, StreamInterface *stream, void *context);
+def(void, Init, Stream stream);
 void ref(DestroyToken)(ref(Token) *token);
 def(ref(Token), Fetch);
 

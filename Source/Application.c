@@ -510,11 +510,11 @@ def(void, Process) {
 			FileStatus_ReadOnly);
 
 		BufferedStream stream;
-		BufferedStream_Init(&stream, &FileStreamImpl, &tplFile);
+		BufferedStream_Init(&stream, File_AsStream(&tplFile));
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);
 
 		Parser parser;
-		Parser_Init(&parser, &BufferedStreamImpl, &stream);
+		Parser_Init(&parser, BufferedStream_AsStream(&stream));
 
 		MethodInstance method = call(NewMethod, this->files->buf[i].name);
 		call(ParseTemplate, &parser, false, method);
