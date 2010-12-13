@@ -36,16 +36,16 @@ def(void, Destroy) {
 }
 
 def(bool, SetOption, String name, String value) {
-	if (String_Equals(name, String("name"))) {
+	if (String_Equals(name, $("name"))) {
 		String_Copy(&this->name, value);
-	} else if (String_Equals(name, String("itf"))) {
-		this->itf = String_Equals(value, String("yes"));
-	} else if (String_Equals(name, String("add"))) {
+	} else if (String_Equals(name, $("itf"))) {
+		this->itf = String_Equals(value, $("yes"));
+	} else if (String_Equals(name, $("add"))) {
 		StringArray *parts = String_Split(value, ':');
 
 		if (parts->len < 2) {
 			Logger_Error(&logger,
-				String("`add' requires two values separated by a colon."));
+				$("`add' requires two values separated by a colon."));
 
 			StringArray_Destroy(parts);
 
@@ -60,11 +60,11 @@ def(bool, SetOption, String name, String value) {
 		scall(TemplateArray_Push, &this->files, insert);
 
 		StringArray_Free(parts);
-	} else if (String_Equals(name, String("dir"))) {
+	} else if (String_Equals(name, $("dir"))) {
 		String_Copy(&this->dir, value);
-	} else if (String_Equals(name, String("ext"))) {
+	} else if (String_Equals(name, $("ext"))) {
 		String_Copy(&this->ext, value);
-	} else if (String_Equals(name, String("out"))) {
+	} else if (String_Equals(name, $("out"))) {
 		String_Copy(&this->out, value);
 	}
 
@@ -74,8 +74,8 @@ def(bool, SetOption, String name, String value) {
 static def(String, FormatVariables, String s) {
 	String tmp = String_Clone(s);
 
-	String_ReplaceAll(&tmp, String("#"), String("tpl->"));
-	String_ReplaceAll(&tmp, String("$"), String(""));
+	String_ReplaceAll(&tmp, $("#"), $("tpl->"));
+	String_ReplaceAll(&tmp, $("$"), $(""));
 
 	return tmp;
 }
@@ -95,7 +95,7 @@ static def(void, HandlePrintVariable, MethodInstance method, String s, String s2
 
 static def(void, HandleTemplate, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
-	String line = String_Format(String("callback(%, res);"), var);
+	String line = String_Format($("callback(%, res);"), var);
 
 	Method_AddLine(method, line);
 
@@ -105,7 +105,7 @@ static def(void, HandleTemplate, MethodInstance method, String s) {
 
 static def(void, HandleIf, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
-	String line = String_Format(String("if (%) {"), var);
+	String line = String_Format($("if (%) {"), var);
 
 	Method_AddLine(method, line);
 	Method_Indent(method);
@@ -116,7 +116,7 @@ static def(void, HandleIf, MethodInstance method, String s) {
 
 static def(void, HandleIfEmpty, MethodInstance method, String s) {
 	String var  = call(FormatVariables, s);
-	String line = String_Format(String("if (%.len == 0) {"), var);
+	String line = String_Format($("if (%.len == 0) {"), var);
 
 	Method_AddLine(method, line);
 	Method_Indent(method);
@@ -129,11 +129,11 @@ static def(void, HandleElse, MethodInstance method, String s) {
 	Method_Unindent(method);
 
 	if (s.len == 0) {
-		Method_AddLine(method, String("} else {"));
+		Method_AddLine(method, $("} else {"));
 		Method_Indent(method);
 	} else {
 		String var  = call(FormatVariables, s);
-		String line = String_Format(String("} else if (%) {"), var);
+		String line = String_Format($("} else if (%) {"), var);
 
 		Method_AddLine(method, line);
 		Method_Indent(method);
@@ -145,7 +145,7 @@ static def(void, HandleElse, MethodInstance method, String s) {
 
 static def(void, HandleEnd, MethodInstance method) {
 	Method_Unindent(method);
-	Method_AddLine(method, String("}"));
+	Method_AddLine(method, $("}"));
 }
 
 static def(void, HandleBlock, MethodInstance method, String params) {
@@ -154,12 +154,12 @@ static def(void, HandleBlock, MethodInstance method, String params) {
 	String line;
 
 	if (offset == String_NotFound) {
-		line = String_Format(String("%(res);"), params);
+		line = String_Format($("%(res);"), params);
 	} else {
 		String var = call(FormatVariables,
 			String_Slice(params, offset + 1));
 
-		line = String_Format(String("%(%, res);"),
+		line = String_Format($("%(%, res);"),
 			String_Slice(params, 0, offset),
 			var);
 
@@ -175,7 +175,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 	StringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
-		Logger_Error(&logger, String("Incomplete for-loop."));
+		Logger_Error(&logger, $("Incomplete for-loop."));
 		throw(ParsingFailed);
 	}
 
@@ -183,14 +183,14 @@ static def(void, HandleFor, MethodInstance method, String params) {
 	String option = parts->buf[1];
 	String from   = call(FormatVariables, parts->buf[2]);
 
-	if (!String_Equals(option, String("in"))) {
-		Logger_Error(&logger, String("For loops don't support '%'"),
+	if (!String_Equals(option, $("in"))) {
+		Logger_Error(&logger, $("For loops don't support '%'"),
 			option);
 
 		throw(ParsingFailed);
 	}
 
-	ssize_t pos = String_Find(from, 0, String(".."));
+	ssize_t pos = String_Find(from, 0, $(".."));
 
 	bool isRange = (pos != String_NotFound);
 
@@ -199,7 +199,7 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		String upper = String_Slice(from, pos + 2);
 
 		String line = String_Format(
-			String("range (%, %, %) {"),
+			$("range (%, %, %) {"),
 			iter, lower, upper);
 
 		Method_AddLine(method, line);
@@ -208,11 +208,11 @@ static def(void, HandleFor, MethodInstance method, String params) {
 		String_Destroy(&line);
 	} else {
 		String line1 = String_Format(
-			String("forward (i, %->len) {"),
+			$("forward (i, %->len) {"),
 			from);
 
 		String line2 = String_Format(
-			String("typeof(%->buf[0]) % = %->buf[i];"),
+			$("typeof(%->buf[0]) % = %->buf[i];"),
 			from, iter, from);
 
 		Method_AddLine(method, line1);
@@ -248,22 +248,22 @@ static def(void, HandleCommand, MethodInstance method, String name, String param
 		call(HandlePrintVariable, method, name, params);
 	} else if (name.buf[0] == '~') {
 		call(HandlePass, method, name, params);
-	} else if (String_Equals(name, String("for"))) {
+	} else if (String_Equals(name, $("for"))) {
 		call(HandleFor, method, params);
-	} else if (String_Equals(name, String("if"))) {
+	} else if (String_Equals(name, $("if"))) {
 		call(HandleIf, method, params);
-	} else if (String_Equals(name, String("empty"))) {
+	} else if (String_Equals(name, $("empty"))) {
 		call(HandleIfEmpty, method, params);
-	} else if (String_Equals(name, String("else"))) {
+	} else if (String_Equals(name, $("else"))) {
 		call(HandleElse, method, params);
-	} else if (String_Equals(name, String("end"))) {
+	} else if (String_Equals(name, $("end"))) {
 		call(HandleEnd, method);
-	} else if (String_Equals(name, String("block"))) {
+	} else if (String_Equals(name, $("block"))) {
 		call(HandleBlock, method, params);
-	} else if (String_Equals(name, String("tpl"))) {
+	} else if (String_Equals(name, $("tpl"))) {
 		call(HandleTemplate, method, params);
 	} else {
-		Logger_Error(&logger, String("Command '%' is unknown."),
+		Logger_Error(&logger, $("Command '%' is unknown."),
 			name);
 
 		throw(ParsingFailed);
@@ -277,7 +277,7 @@ static def(String, EscapeLine, String s) {
 		if (s.buf[i] != '"') {
 			String_Append(&res, s.buf[i]);
 		} else {
-			String_Append(&res, String("\\\""));
+			String_Append(&res, $("\\\""));
 		}
 	}
 
@@ -297,7 +297,7 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 		String line = items->buf[i];
 
 		if (!flushed) {
-			Method_AddLine(method, String("String_Append(res, String("));
+			Method_AddLine(method, $("String_Append(res, $("));
 			Method_Indent(method);
 			flushed = true;
 		}
@@ -308,7 +308,7 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 
 		if (items->len > 1) {
 			if (i + 1 != items->len) {
-				String_Append(&escaped, String("\\n"));
+				String_Append(&escaped, $("\\n"));
 			}
 		}
 
@@ -321,7 +321,7 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 
 	if (flushed) {
 		Method_Unindent(method);
-		Method_AddLine(method, String("));"));
+		Method_AddLine(method, $("));"));
 	}
 
 	StringArray_Free(items);
@@ -359,15 +359,15 @@ static def(MethodInstance, NewBlockMethod, String name, String params, bool publ
 }
 
 static def(bool, StartsCommandBlock, String cmd) {
-	return String_Equals(cmd, String("if"))
-		|| String_Equals(cmd, String("for"))
-		|| String_Equals(cmd, String("else"))
-		|| String_Equals(cmd, String("empty"));
+	return String_Equals(cmd, $("if"))
+		|| String_Equals(cmd, $("for"))
+		|| String_Equals(cmd, $("else"))
+		|| String_Equals(cmd, $("empty"));
 }
 
 static def(bool, EndsCommandBlock, String cmd) {
-	return String_Equals(cmd, String("end"))
-		|| String_Equals(cmd, String("else"));
+	return String_Equals(cmd, $("end"))
+		|| String_Equals(cmd, $("else"));
 }
 
 static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInstance method) {
@@ -405,21 +405,21 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 					cur.cmd.params);
 			} else if (cur.state == Parser_State_Block) {
 				if (inBlock) {
-					if (String_Equals(cur.block, String("end"))) {
+					if (String_Equals(cur.block, $("end"))) {
 						goto out;
 					}
 
 					Logger_Error(&logger,
-						String("'%' not understood."),
+						$("'%' not understood."),
 						cur.block);
 
 					throw(ParsingFailed);
 				}
 
-				ssize_t pos = String_Find(cur.block, String(": "));
+				ssize_t pos = String_Find(cur.block, $(": "));
 
 				String blkname   = cur.block;
-				String blkparams = String("");
+				String blkparams = $("");
 
 				if (pos != String_NotFound) {
 					blkname   = String_Slice(cur.block, 0, pos);
@@ -479,7 +479,7 @@ def(void, Scan) {
 				String_Slice(
 					item.name, 0, -this->ext.len));
 
-		insert.file = String_Format(String("%/%"), this->dir, item.name);
+		insert.file = String_Format($("%/%"), this->dir, item.name);
 
 		scall(TemplateArray_Push, &this->files, insert);
 	}
@@ -489,7 +489,7 @@ def(void, Scan) {
 
 def(void, Process) {
 	if (this->out.len == 0) {
-		Logger_Error(&logger, String("No output path is set."));
+		Logger_Error(&logger, $("No output path is set."));
 		throw(InvalidParameter);
 	}
 
@@ -502,7 +502,7 @@ def(void, Process) {
 	Output_SetClassName(&output, this->name);
 
 	for (size_t i = 0; i < this->files->len; i++) {
-		Logger_Info(&logger, String("Processing %..."),
+		Logger_Info(&logger, $("Processing %..."),
 			this->files->buf[i].file);
 
 		File tplFile;

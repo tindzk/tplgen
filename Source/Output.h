@@ -9,7 +9,7 @@
 
 #define self Output
 
-#define	Output_Warning String(                   \
+#define	Output_Warning $(                        \
 	"/* "                                        \
 		"Warning: This file is auto-generated. " \
 	"*/"                                         \

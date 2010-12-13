@@ -28,8 +28,8 @@ def(void, Init, String file, bool itf) {
 	this->itf = itf;
 	this->className = HeapString(0);
 
-	String src = String_Concat(file, String(".c"));
-	String hdr = String_Concat(file, String(".h"));
+	String src = String_Concat(file, $(".c"));
+	String hdr = String_Concat(file, $(".h"));
 
 	call(Open, src, &this->srcFile, &this->src);
 	call(Open, hdr, &this->hdrFile, &this->hdr);
@@ -64,31 +64,31 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 	String res = HeapString(0);
 
 	if (method->hidden) {
-		String_Append(&res, String("static "));
+		String_Append(&res, $("static "));
 	}
 
-	String_Append(&res, String("void "));
+	String_Append(&res, $("void "));
 
 	if (!method->block) {
 		String_Append(&res, this->className);
-		String_Append(&res, String("_"));
+		String_Append(&res, $("_"));
 	}
 
 	String_Append(&res, method->name);
-	String_Append(&res, String("("));
+	String_Append(&res, $("("));
 
 	if (method->block) {
 		String_Append(&res, method->params);
 
 		if (method->params.len > 0) {
-			String_Append(&res, String(", "));
+			String_Append(&res, $(", "));
 		}
 	} else {
 		String_Append(&res, method->name);
-		String_Append(&res, String("Template *tpl, "));
+		String_Append(&res, $("Template *tpl, "));
 	}
 
-	String_Append(&res, String("String *res)"));
+	String_Append(&res, $("String *res)"));
 
 	if (src) {
 		call(WriteSourceString, res);
@@ -102,13 +102,13 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 static def(void, WriteSource, Method_List *methods) {
 	call(WriteSourceString, Output_Warning);
 
-	call(WriteSourceString, String("#import \""));
+	call(WriteSourceString, $("#import \""));
 	call(WriteSourceString, this->className);
-	call(WriteSourceString, String(".h\"\n\n"));
+	call(WriteSourceString, $(".h\"\n\n"));
 
-	call(WriteSourceString, String("#define self "));
+	call(WriteSourceString, $("#define self "));
 	call(WriteSourceString, this->className);
-	call(WriteSourceString, String("\n\n"));
+	call(WriteSourceString, $("\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
@@ -118,25 +118,25 @@ static def(void, WriteSource, Method_List *methods) {
 		/* Omit empty methods. */
 		if (method->lines.first != NULL) {
 			call(WriteDeclaration, method, true);
-			call(WriteSourceString, String(" {\n"));
+			call(WriteSourceString, $(" {\n"));
 
 			LinkedList_Foreach(&method->lines, lineNode) {
 				for (size_t i = 0; i <= lineNode->indent; i++) {
-					call(WriteSourceString, String("\t"));
+					call(WriteSourceString, $("\t"));
 				}
 
 				call(WriteSourceString, lineNode->line);
-				call(WriteSourceString, String("\n"));
+				call(WriteSourceString, $("\n"));
 			}
 
-			call(WriteSourceString, String("}\n\n"));
+			call(WriteSourceString, $("}\n\n"));
 		}
 	}
 
 	if (this->itf) {
-		call(WriteSourceString, String("TemplateInterface Templates_"));
+		call(WriteSourceString, $("TemplateInterface Templates_"));
 		call(WriteSourceString, this->className);
-		call(WriteSourceString, String(" = {\n"));
+		call(WriteSourceString, $(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
 			Method *method = Method_GetObject(node->method);
@@ -148,52 +148,52 @@ static def(void, WriteSource, Method_List *methods) {
 			String name = String_Clone(method->name);
 			name.buf[0] = (char) Char_ToLower(name.buf[0]);
 
-			call(WriteSourceString, String("\t."));
+			call(WriteSourceString, $("\t."));
 			call(WriteSourceString, name);
-			call(WriteSourceString, String(" = &"));
+			call(WriteSourceString, $(" = &"));
 			call(WriteSourceString, this->className);
-			call(WriteSourceString, String("_"));
+			call(WriteSourceString, $("_"));
 			call(WriteSourceString, method->name);
-			call(WriteSourceString, String(",\n"));
+			call(WriteSourceString, $(",\n"));
 
 			String_Destroy(&name);
 		}
 
-		call(WriteSourceString, String("};"));
+		call(WriteSourceString, $("};"));
 	}
 }
 
 static def(void, WriteHeader, Method_List *methods) {
 	call(WriteHeaderString, Output_Warning);
 
-	call(WriteHeaderString, String("#import <String.h>\n"));
-	call(WriteHeaderString, String("#import <Integer.h>\n"));
-	call(WriteHeaderString, String("#import <tplgen/Template.h>\n\n"));
+	call(WriteHeaderString, $("#import <String.h>\n"));
+	call(WriteHeaderString, $("#import <Integer.h>\n"));
+	call(WriteHeaderString, $("#import <tplgen/Template.h>\n\n"));
 
-	call(WriteHeaderString, String("#import \""));
+	call(WriteHeaderString, $("#import \""));
 	call(WriteHeaderString, this->className);
-	call(WriteHeaderString, String(".private.h\"\n\n"));
+	call(WriteHeaderString, $(".private.h\"\n\n"));
 
-	call(WriteHeaderString, String("#define self "));
+	call(WriteHeaderString, $("#define self "));
 	call(WriteHeaderString, this->className);
-	call(WriteHeaderString, String("\n\n"));
+	call(WriteHeaderString, $("\n\n"));
 
 	if (this->itf) {
-		call(WriteHeaderString, String("TemplateInterface Templates_"));
+		call(WriteHeaderString, $("TemplateInterface Templates_"));
 		call(WriteHeaderString, this->className);
-		call(WriteHeaderString, String(";"));
+		call(WriteHeaderString, $(";"));
 	} else {
 		DoublyLinkedList_ReverseForeach(methods, node) {
 			Method *method = Method_GetObject(node->method);
 
 			if (method->lines.first != NULL) {
 				call(WriteDeclaration, method, false);
-				call(WriteHeaderString, String(";\n"));
+				call(WriteHeaderString, $(";\n"));
 			}
 		}
 	}
 
-	call(WriteHeaderString, String("\n#undef self\n"));
+	call(WriteHeaderString, $("\n#undef self\n"));
 }
 
 def(void, Write, Method_List *methods) {
