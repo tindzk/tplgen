@@ -90,3 +90,9 @@ static inline overload void Template_Print(u32 val, String *res) {
 static inline overload void Template_Print(u64 val, String *res) {
 	String_Append(res, UInt64_ToString(val));
 }
+
+#if defined(__x86_64__)
+static inline overload void Template_Print(size_t val, String *res) {
+	String_Append(res, UInt64_ToString(val));
+}
+#endif
