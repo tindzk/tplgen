@@ -93,7 +93,7 @@ def(ref(Token), Fetch) {
 	while (!delegate(this->stream, isEof)) {
 		delegate(this->stream, read, &cur, 1);
 
-		if (cur == '{' || cur == '[' && prev != '\\') {
+		if ((cur == '{' || cur == '[') && prev != '\\') {
 			if (token.state != ref(State_None)) {
 				this->proceed     = true;
 				this->proceedChar = cur;

@@ -419,7 +419,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 				ssize_t pos = String_Find(cur.block, $(": "));
 
 				String blkname   = cur.block;
-				String blkparams = $("");
+				String blkparams = HeapString(0);
 
 				if (pos != String_NotFound) {
 					blkname   = String_Slice(cur.block, 0, pos);
