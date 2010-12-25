@@ -7,13 +7,17 @@
 
 DefineCallback(Template, void, String *);
 
-#define tpl(name) \
+#define tpl(name)                                                                \
+	struct simpleConcat(name, Template);                                         \
+	void Template_##name(struct simpleConcat(name, Template) *tpl, String *res); \
+	static inline Template tpl##name(                                            \
+		union { struct simpleConcat(name, Template) *addr } transparentUnion $ptr\
+	) {                                                                          \
+		return (Template) Callback(                                              \
+			Generic_FromObject($ptr.addr),                                       \
+			Template_##name);                                                    \
+	}                                                                            \
 	record(simpleConcat(name, Template))
-
-#define Template(meth, obj)       \
-	(Template) Callback(          \
-		Generic_FromObject(&obj), \
-		meth)
 
 static inline overload void Template_Print(Date date, String *res) {
 	String s = Date_Format(date, false);
