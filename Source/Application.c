@@ -244,6 +244,10 @@ static def(void, HandlePass, MethodInstance method, String name, String params) 
 }
 
 static def(void, HandleCommand, MethodInstance method, String name, String params) {
+	if (name.len == 0) {
+		return;
+	}
+
 	if (name.buf[0] == '$' || name.buf[0] == '#') {
 		call(HandlePrintVariable, method, name, params);
 	} else if (name.buf[0] == '~') {
