@@ -7,11 +7,11 @@
 
 Logger logger;
 
-void OnLogMessage(__unused void *ptr, String msg, Logger_Level level, String file, int line) {
+void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String file, int line) {
 	String slevel = Logger_ResolveLevel(level);
 	String sline  = Integer_ToString(line);
 
-	String_FmtPrint($("[%] % (%:%)\n"), slevel, msg, file, sline);
+	String_FmtPrint($("[%] $ (%:%)\n"), slevel, msg, file, sline);
 }
 
 int main(int argc, char **argv) {
