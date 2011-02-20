@@ -26,7 +26,7 @@ static def(void, Open, String path, File *file, BufferedStream *stream) {
 
 def(void, Init, String file, bool itf) {
 	this->itf = itf;
-	this->className = HeapString(0);
+	this->className = String_New(0);
 
 	String src = String_Concat(file, $(".c"));
 	String hdr = String_Concat(file, $(".h"));
@@ -61,7 +61,7 @@ def(void, SetClassName, String s) {
 }
 
 static def(void, WriteDeclaration, Method *method, bool src) {
-	String res = HeapString(0);
+	String res = String_New(0);
 
 	if (method->hidden) {
 		String_Append(&res, $("static "));

@@ -44,39 +44,57 @@ static inline overload void Template_Print(String s, String *res) {
 }
 
 static inline overload void Template_Print(s8 val, String *res) {
-	String_Append(res, Int8_ToString(val));
+	String s = Int8_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(s16 val, String *res) {
-	String_Append(res, Int16_ToString(val));
+	String s = Int16_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(s32 val, String *res) {
-	String_Append(res, Int32_ToString(val));
+	String s = Int32_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(s64 val, String *res) {
-	String_Append(res, Int64_ToString(val));
+	String s = Int64_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(u8 val, String *res) {
-	String_Append(res, UInt8_ToString(val));
+	String s = UInt8_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(u16 val, String *res) {
-	String_Append(res, UInt16_ToString(val));
+	String s = UInt16_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(u32 val, String *res) {
-	String_Append(res, UInt32_ToString(val));
+	String s = UInt32_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 static inline overload void Template_Print(u64 val, String *res) {
-	String_Append(res, UInt64_ToString(val));
+	String s = UInt64_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 
 #if defined(__x86_64__)
 static inline overload void Template_Print(size_t val, String *res) {
-	String_Append(res, UInt64_ToString(val));
+	String s = UInt64_ToString(val);
+	String_Append(res, s);
+	String_Destroy(&s);
 }
 #endif

@@ -34,7 +34,7 @@ void ref(DestroyToken)(ref(Token) *token) {
 static def(void, ParseCommand, ref(Token) *token) {
 	char cur = '\0';
 
-	String buf = HeapString(64);
+	String buf = String_New(64);
 
 	while (!delegate(this->stream, isEof)) {
 		delegate(this->stream, read, &cur, 1);
@@ -53,7 +53,7 @@ static def(void, ParseCommand, ref(Token) *token) {
 		token->cmd.params = String_Clone(String_Slice(buf, pos + 1));
 	} else {
 		token->cmd.name   = String_Clone(String_Slice(buf, 0));
-		token->cmd.params = HeapString(0);
+		token->cmd.params = String_New(0);
 	}
 
 	String_Destroy(&buf);
@@ -62,7 +62,7 @@ static def(void, ParseCommand, ref(Token) *token) {
 static def(void, ParseBlock, ref(Token) *token) {
 	char cur = '\0';
 
-	token->block = HeapString(64);
+	token->block = String_New(64);
 
 	while (!delegate(this->stream, isEof)) {
 		delegate(this->stream, read, &cur, 1);
@@ -114,7 +114,7 @@ def(ref(Token), Fetch) {
 		} else {
 			if (token.state == ref(State_None)) {
 				token.state = ref(State_Text);
-				token.text  = HeapString(128);
+				token.text  = String_New(128);
 			}
 
 			String_Append(&token.text, cur);

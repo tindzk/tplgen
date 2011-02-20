@@ -6,10 +6,10 @@ extern Logger logger;
 
 def(void, Init) {
 	this->itf   = true;
-	this->dir   = HeapString(0);
-	this->ext   = HeapString(0);
-	this->out   = HeapString(0);
-	this->name  = HeapString(0);
+	this->dir   = $("");
+	this->ext   = $("");
+	this->out   = $("");
+	this->name  = $("");
 	this->files = scall(TemplateArray_New, 50);
 
 	DoublyLinkedList_Init(&this->methods);
@@ -275,9 +275,9 @@ static def(void, HandleCommand, MethodInstance method, String name, String param
 }
 
 static def(String, EscapeLine, String s) {
-	String res = HeapString(s.len + 15);
+	String res = String_New(s.len + 15);
 
-	for (size_t i = 0; i < s.len; i++) {
+	forward (i, s.len) {
 		if (s.buf[i] != '"') {
 			String_Append(&res, s.buf[i]);
 		} else {
@@ -297,7 +297,7 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 
 	StringArray *items = String_Split(s, '\n');
 
-	for (size_t i = 0; i < items->len; i++) {
+	forward (i, items->len) {
 		String line = items->buf[i];
 
 		if (!flushed) {
@@ -308,17 +308,16 @@ static def(void, FlushBuf, MethodInstance method, String s) {
 
 		String escaped = call(EscapeLine, line);
 
-		String_Prepend(&escaped, '"');
-
+		String nl = $("");
 		if (items->len > 1) {
 			if (i + 1 != items->len) {
-				String_Append(&escaped, $("\\n"));
+				nl = $("\\n");
 			}
 		}
 
-		String_Append(&escaped, '"');
-
-		Method_AddLine(method, escaped);
+		String fmt = String_Format($("\"%\"%"), escaped, nl);
+		Method_AddLine(method, fmt);
+		String_Destroy(&fmt);
 
 		String_Destroy(&escaped);
 	}
@@ -423,7 +422,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 				ssize_t pos = String_Find(cur.block, $(": "));
 
 				String blkname   = cur.block;
-				String blkparams = HeapString(0);
+				String blkparams = String_New(0);
 
 				if (pos != String_NotFound) {
 					blkname   = String_Slice(cur.block, 0, pos);
@@ -467,8 +466,9 @@ def(void, Scan) {
 	Directory_Init(&dir, this->dir);
 
 	while (Directory_Read(&dir, &item)) {
-		if (item.type != Directory_ItemType_Symlink
-		 && item.type != Directory_ItemType_Regular) {
+		if (item.type != Directory_ItemType_Symlink &&
+			item.type != Directory_ItemType_Regular)
+		{
 			continue;
 		}
 
@@ -505,7 +505,7 @@ def(void, Process) {
 	Output_Init(&output, this->out, this->itf);
 	Output_SetClassName(&output, this->name);
 
-	for (size_t i = 0; i < this->files->len; i++) {
+	forward (i, this->files->len) {
 		Logger_Info(&logger, $("Processing %..."),
 			this->files->buf[i].file);
 

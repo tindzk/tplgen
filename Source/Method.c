@@ -8,7 +8,7 @@ def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 
 	this->name   = String_Clone(name);
-	this->params = HeapString(0);
+	this->params = $("");
 	this->hidden = hidden;
 	this->block  = false;
 	this->indent = 0;

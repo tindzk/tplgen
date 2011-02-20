@@ -16,6 +16,8 @@ void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String 
 	Terminal_FmtPrint(&term,
 		$("[%] $ (%:%)\n"),
 		slevel, msg, file, sline);
+
+	String_Destroy(&sline);
 }
 
 int main(int argc, char **argv) {
