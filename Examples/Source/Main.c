@@ -1,4 +1,5 @@
 #import <String.h>
+#import <Terminal.h>
 #import <Exception.h>
 
 #import "Article.h"
@@ -25,18 +26,18 @@ int main(__unused int argc, __unused char *argv[]) {
 	Articles_Push(&articles, Article(1, $("Second article")));
 	Articles_Push(&articles, Article(2, $("Third article")));
 
-	String res = HeapString(0);
+	String res = String_New(0);
 
 	String_Print($("Listing template:\n"));
 	printListing(&res, articles);
-	String_Print(res);
+	String_Print(res.prot);
 
 	String_Print($("\n\n"));
 	res.len = 0;
 
 	String_Print($("Article template:\n"));
 	printArticle(&res, articles->buf[1]);
-	String_Print(res);
+	String_Print(res.prot);
 
 	String_Print($("\n"));
 

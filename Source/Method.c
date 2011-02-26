@@ -2,13 +2,11 @@
 
 #define self Method
 
-// @exc InvalidDepth
-
 def(void, Init, String name, bool hidden) {
 	LinkedList_Init(&this->lines);
 
-	this->name   = String_Clone(name);
-	this->params = $("");
+	this->name   = name;
+	this->params = String_New(0);
 	this->hidden = hidden;
 	this->block  = false;
 	this->indent = 0;
@@ -19,7 +17,7 @@ def(void, SetBlock, bool value) {
 }
 
 def(void, SetParameters, String value) {
-	this->params = String_Clone(value);
+	String_Assign(&this->params, &value);
 }
 
 def(void, Destroy) {
@@ -28,14 +26,13 @@ def(void, Destroy) {
 
 	LinkedList_Destroy(&this->lines, ^(ref(LineItem) *item) {
 		String_Destroy(&item->line);
-		Memory_Free(item);
 	});
 }
 
 def(void, AddLine, String line) {
 	ref(LineItem) *item = New(ref(LineItem));
 
-	item->line   = String_Clone(line);
+	item->line   = line;
 	item->indent = this->indent;
 
 	LinkedList_InsertEnd(&this->lines, item);

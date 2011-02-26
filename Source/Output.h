@@ -27,7 +27,7 @@ class {
 	BufferedStream hdr;
 };
 
-def(void, Init, String file, bool itf);
+def(void, Init, ProtString file, bool itf);
 def(void, Destroy);
 def(void, SetClassName, String s);
 def(void, Write, Method_List *methods);

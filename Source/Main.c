@@ -10,8 +10,8 @@ Logger logger;
 Terminal term;
 
 void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String file, int line) {
-	String slevel = Logger_ResolveLevel(level);
-	String sline  = Integer_ToString(line);
+	ProtString slevel = Logger_ResolveLevel(level);
+	String sline = Integer_ToString(line);
 
 	Terminal_FmtPrint(&term,
 		$("[%] $ (%:%)\n"),
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 	Application_Init(&app);
 
 	for (size_t i = 1; i < (size_t) argc; i++) {
-		String arg = String_FromNul(argv[i]);
+		ProtString arg = String_FromNul(argv[i]);
 
 		ssize_t pos = String_Find(arg, '=');
 
@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
-		String name  = String_Slice(arg, 0, pos);
-		String value = String_Slice(arg, pos + 1);
+		ProtString name  = String_Slice(arg, 0, pos);
+		ProtString value = String_Slice(arg, pos + 1);
 
 		if (!Application_SetOption(&app, name, value)) {
 			return ExitStatus_Failure;

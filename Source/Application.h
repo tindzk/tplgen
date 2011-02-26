@@ -36,7 +36,7 @@ class {
 
 def(void, Init);
 def(void, Destroy);
-def(bool, SetOption, String name, String value);
+def(bool, SetOption, ProtString name, ProtString value);
 def(void, Process);
 
 #undef self
