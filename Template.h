@@ -37,6 +37,10 @@ static inline overload void Template_Print(Date_RFC822 date, String *res) {
 	String_Destroy(&s);
 }
 
+static inline overload void Template_Print(String s, String *res) {
+	HTML_Entities_Encode(s.prot, res);
+}
+
 static inline overload void Template_Print(ProtString s, String *res) {
 	HTML_Entities_Encode(s, res);
 }
