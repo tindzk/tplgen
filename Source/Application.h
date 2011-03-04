@@ -34,7 +34,7 @@ class {
 	ref(TemplateArray) *files;
 };
 
-def(void, Init);
+rsdef(self, New);
 def(void, Destroy);
 def(bool, SetOption, ProtString name, ProtString value);
 def(void, Process);

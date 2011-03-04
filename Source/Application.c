@@ -4,15 +4,19 @@
 
 extern Logger logger;
 
-def(void, Init) {
-	this->itf   = true;
-	this->dir   = String_New(0);
-	this->ext   = String_New(0);
-	this->out   = String_New(0);
-	this->name  = String_New(0);
-	this->files = scall(TemplateArray_New, 50);
+rsdef(self, New) {
+	self res;
 
-	DoublyLinkedList_Init(&this->methods);
+	res.itf   = true;
+	res.dir   = String_New(0);
+	res.ext   = String_New(0);
+	res.out   = String_New(0);
+	res.name  = String_New(0);
+	res.files = scall(TemplateArray_New, 50);
+
+	DoublyLinkedList_Init(&res.methods);
+
+	return res;
 }
 
 def(void, Destroy) {
@@ -40,25 +44,21 @@ def(bool, SetOption, ProtString name, ProtString value) {
 	} else if (String_Equals(name, $("itf"))) {
 		this->itf = String_Equals(value, $("yes"));
 	} else if (String_Equals(name, $("add"))) {
-		StringArray *parts = String_Split(value, ':');
+		ProtStringArray *parts = String_Split(value, ':');
 
 		if (parts->len < 2) {
 			Logger_Error(&logger,
 				$("`add' requires two values separated by a colon."));
-
-			StringArray_Destroy(parts);
-
+			ProtStringArray_Free(parts);
 			return false;
 		}
 
-		ref(TemplateItem) insert;
+		scall(TemplateArray_Push, &this->files, (ref(TemplateItem)) {
+			.name = String_Clone(parts->buf[0]),
+			.file = String_Clone(parts->buf[1])
+		});
 
-		insert.name = String_Clone(parts->buf[0]);
-		insert.file = String_Clone(parts->buf[1]);
-
-		scall(TemplateArray_Push, &this->files, insert);
-
-		StringArray_Free(parts);
+		ProtStringArray_Free(parts);
 	} else if (String_Equals(name, $("dir"))) {
 		String_Copy(&this->dir, value);
 	} else if (String_Equals(name, $("ext"))) {
@@ -124,7 +124,7 @@ static def(void, HandleElse, MethodInstance method, ProtString s) {
 	Method_Unindent(method);
 
 	if (s.len == 0) {
-		Method_AddLine(method, String_Clone($("} else {")));
+		Method_AddLine(method, $("} else {"));
 		Method_Indent(method);
 	} else {
 		String var = call(FormatVariables, s);
@@ -139,7 +139,7 @@ static def(void, HandleElse, MethodInstance method, ProtString s) {
 
 static def(void, HandleEnd, MethodInstance method) {
 	Method_Unindent(method);
-	Method_AddLine(method, String_Clone($("}")));
+	Method_AddLine(method, $("}"));
 }
 
 static def(void, HandleBlock, MethodInstance method, ProtString params) {
@@ -164,7 +164,7 @@ static def(void, HandleBlock, MethodInstance method, ProtString params) {
 }
 
 static def(void, HandleFor, MethodInstance method, ProtString params) {
-	StringArray *parts = String_Split(params, ' ');
+	ProtStringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
 		Logger_Error(&logger, $("Incomplete for-loop."));
@@ -212,7 +212,7 @@ static def(void, HandleFor, MethodInstance method, ProtString params) {
 	String_Destroy(&from);
 	String_Destroy(&iter);
 
-	StringArray_Free(parts);
+	ProtStringArray_Free(parts);
 }
 
 static def(void, HandlePass, MethodInstance method, ProtString name, ProtString params) {
@@ -278,14 +278,13 @@ static def(void, FlushBuf, MethodInstance method, ProtString s) {
 
 	bool flushed = false;
 
-	StringArray *items = String_Split(s, '\n');
+	ProtStringArray *items = String_Split(s, '\n');
 
 	forward (i, items->len) {
 		ProtString line = items->buf[i];
 
 		if (!flushed) {
-			Method_AddLine(method,
-				String_Clone($("String_Append(res, $(")));
+			Method_AddLine(method, $("String_Append(res, $("));
 			Method_Indent(method);
 			flushed = true;
 		}
@@ -308,10 +307,10 @@ static def(void, FlushBuf, MethodInstance method, ProtString s) {
 
 	if (flushed) {
 		Method_Unindent(method);
-		Method_AddLine(method, String_Clone($("));")));
+		Method_AddLine(method, $("));"));
 	}
 
-	StringArray_Free(items);
+	ProtStringArray_Free(items);
 }
 
 static def(MethodInstance, NewMethod, String name) {

@@ -21,7 +21,7 @@ void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String 
 }
 
 int main(int argc, char **argv) {
-	Terminal_Init(&term, File_StdIn, File_StdOut, false);
+	term = Terminal_New(File_StdIn, File_StdOut, false);
 
 	Logger_Init(&logger, Callback(NULL, &OnLogMessage),
 		Logger_Level_Fatal |
@@ -36,8 +36,7 @@ int main(int argc, char **argv) {
 		return ExitStatus_Failure;
 	}
 
-	Application app;
-	Application_Init(&app);
+	Application app = Application_New();
 
 	for (size_t i = 1; i < (size_t) argc; i++) {
 		ProtString arg = String_FromNul(argv[i]);

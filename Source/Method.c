@@ -17,7 +17,7 @@ def(void, SetBlock, bool value) {
 }
 
 def(void, SetParameters, String value) {
-	String_Assign(&this->params, &value);
+	String_Assign(&this->params, value);
 }
 
 def(void, Destroy) {
@@ -25,14 +25,23 @@ def(void, Destroy) {
 	String_Destroy(&this->params);
 
 	LinkedList_Destroy(&this->lines, ^(ref(LineItem) *item) {
-		String_Destroy(&item->line);
+		CarrierString_Destroy(&item->line);
 	});
 }
 
-def(void, AddLine, String line) {
+overload def(void, AddLine, String line) {
 	ref(LineItem) *item = New(ref(LineItem));
 
-	item->line   = line;
+	item->line   = String_ToCarrier(line);
+	item->indent = this->indent;
+
+	LinkedList_InsertEnd(&this->lines, item);
+}
+
+overload def(void, AddLine, ProtString line) {
+	ref(LineItem) *item = New(ref(LineItem));
+
+	item->line   = String_ToCarrier(line);
 	item->indent = this->indent;
 
 	LinkedList_InsertEnd(&this->lines, item);

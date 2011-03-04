@@ -57,7 +57,7 @@ static def(void, WriteHeaderString, ProtString s) {
 }
 
 def(void, SetClassName, String s) {
-	String_Assign(&this->className, &s);
+	String_Assign(&this->className, s);
 }
 
 static def(void, WriteDeclaration, Method *method, bool src) {

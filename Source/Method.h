@@ -8,7 +8,7 @@
 // @exc InvalidDepth
 
 record(ref(LineItem)) {
-	String line;
+	CarrierString line;
 	size_t indent;
 	LinkedList_DeclareRef(ref(LineItem));
 };
@@ -40,7 +40,8 @@ def(void, Init, String name, bool hidden);
 def(void, SetBlock, bool value);
 def(void, SetParameters, String value);
 def(void, Destroy);
-def(void, AddLine, String line);
+overload def(void, AddLine, String line);
+overload def(void, AddLine, ProtString line);
 def(void, Indent);
 def(void, Unindent);
 
