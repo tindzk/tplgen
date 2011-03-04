@@ -117,10 +117,18 @@ def(ref(Token), Fetch) {
 				token.text  = String_New(128);
 			}
 
-			String_Append(&token.text, cur);
+			if (prev != '\0') {
+				if (cur != '{' && cur != '[' && prev != '\\') {
+					String_Append(&token.text, prev);
+				}
+			}
 		}
 
 		prev = cur;
+	}
+
+	if (prev != '\0') {
+		String_Append(&token.text, prev);
 	}
 
 	return token;
