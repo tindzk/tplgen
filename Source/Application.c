@@ -198,15 +198,15 @@ static def(void, HandleFor, MethodInstance method, ProtString params) {
 	} else {
 		Method_AddLine(method,
 			String_Format(
-				$("forward (i, %->len) {"),
-				from.prot));
+				$("foreach (_%, %) {"),
+				iter.prot, from.prot));
 
 		Method_Indent(method);
 
 		Method_AddLine(method,
 			String_Format(
-				$("typeof(%->buf[0]) % = %->buf[i];"),
-				from.prot, iter.prot, from.prot));
+				$("typeof(*_%) % = *_%;"),
+				iter.prot, iter.prot, iter.prot));
 	}
 
 	String_Destroy(&from);
