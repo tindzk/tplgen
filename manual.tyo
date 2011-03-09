@@ -1,5 +1,6 @@
 .meta {
-	.title{tplgen: template generator}
+	.title{tplgen}
+	.subtitle{Template Generator}
 }
 
 .chapter[Introduction] {
