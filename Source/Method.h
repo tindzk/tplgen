@@ -13,6 +13,8 @@ record(ref(LineItem)) {
 	LinkedList_DeclareRef(ref(LineItem));
 };
 
+MemoryHelpers(ref(LineItem));
+
 LinkedList_DeclareList(ref(LineItem), ref(LineList));
 
 class {
@@ -27,12 +29,14 @@ class {
 	ref(LineList) lines;
 };
 
-ExtendClass;
+MemoryHelpers(self);
 
 record(ref(Item)) {
-	MethodInstance method;
+	Method *method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 };
+
+MemoryHelpers(ref(Item));
 
 DoublyLinkedList_DeclareList(ref(Item), ref(List));
 

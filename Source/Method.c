@@ -30,7 +30,7 @@ def(void, Destroy) {
 }
 
 overload def(void, AddLine, String line) {
-	ref(LineItem) *item = New(ref(LineItem));
+	ref(LineItem) *item = scall(LineItem_Alloc);
 
 	item->line   = String_ToCarrier(line);
 	item->indent = this->indent;
@@ -39,7 +39,7 @@ overload def(void, AddLine, String line) {
 }
 
 overload def(void, AddLine, ProtString line) {
-	ref(LineItem) *item = New(ref(LineItem));
+	ref(LineItem) *item = scall(LineItem_Alloc);
 
 	item->line   = String_ToCarrier(line);
 	item->indent = this->indent;

@@ -11,9 +11,9 @@ static def(void, Open, ProtString path, File *file, BufferedStream *stream) {
 			FileStatus_Truncate  |
 			FileStatus_WriteOnly);
 
-		BufferedStream_Init(stream, File_AsStream(file));
+		*stream = BufferedStream_New(File_AsStream(file));
 		BufferedStream_SetOutputBuffer(stream, 4096);
-	} clean catchModule(File) {
+	} catchModule(File) {
 		Logger_Error(&logger,
 			$("Couldn't open file % for writing."),
 			path);

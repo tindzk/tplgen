@@ -313,12 +313,12 @@ static def(void, FlushBuf, MethodInstance method, ProtString s) {
 	ProtStringArray_Free(items);
 }
 
-static def(MethodInstance, NewMethod, String name) {
-	MethodInstance method = Method_New();
+static def(Method *, NewMethod, String name) {
+	Method *method = Method_Alloc();
 
 	Method_Init(method, name, this->itf);
 
-	Method_Item *item = New(Method_Item);
+	Method_Item *item = Method_Item_Alloc();
 
 	item->method = method;
 
@@ -327,15 +327,15 @@ static def(MethodInstance, NewMethod, String name) {
 	return method;
 }
 
-static def(MethodInstance, NewBlockMethod, String name, String params, bool public) {
-	MethodInstance method = Method_New();
+static def(Method *, NewBlockMethod, String name, String params, bool public) {
+	Method *method = Method_Alloc();
 
 	Method_Init(method, name, !public);
 
 	Method_SetBlock(method, true);
 	Method_SetParameters(method, params);
 
-	Method_Item *item = New(Method_Item);
+	Method_Item *item = Method_Item_Alloc();
 
 	item->method = method;
 
@@ -420,7 +420,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 					blkname = String_Slice(blkname, tmp.len);
 				}
 
-				MethodInstance blockMethod =
+				Method *blockMethod =
 					call(NewBlockMethod, String_Clone(blkname), blkparams, public);
 				call(ParseTemplate, parser, true, blockMethod);
 			}
@@ -492,14 +492,13 @@ def(void, Process) {
 		FileStream_Open(&tplFile, this->files->buf[i].file.prot,
 			FileStatus_ReadOnly);
 
-		BufferedStream stream;
-		BufferedStream_Init(&stream, File_AsStream(&tplFile));
+		BufferedStream stream = BufferedStream_New(File_AsStream(&tplFile));
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);
 
 		Parser parser;
 		Parser_Init(&parser, BufferedStream_AsStream(&stream));
 
-		MethodInstance method = call(NewMethod,
+		Method *method = call(NewMethod,
 			String_Clone(this->files->buf[i].name.prot));
 		call(ParseTemplate, &parser, false, method);
 

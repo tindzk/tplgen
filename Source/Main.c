@@ -57,13 +57,8 @@ int main(int argc, char **argv) {
 
 	try {
 		Application_Process(&app);
-	} clean catchAny {
+	} catchAny {
 		Exception_Print(e);
-
-#if Exception_SaveTrace
-		Backtrace_PrintTrace(__exc_mgr.e.trace, __exc_mgr.e.traceItems);
-#endif
-
 		excReturn ExitStatus_Failure;
 	} finally {
 		Application_Destroy(&app);
