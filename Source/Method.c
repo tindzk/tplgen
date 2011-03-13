@@ -38,7 +38,7 @@ overload def(void, AddLine, String line) {
 	LinkedList_InsertEnd(&this->lines, item);
 }
 
-overload def(void, AddLine, ProtString line) {
+overload def(void, AddLine, OmniString line) {
 	ref(LineItem) *item = scall(LineItem_Alloc);
 
 	item->line   = String_ToCarrier(line);

@@ -46,13 +46,13 @@ static def(void, ParseCommand, ref(Token) *token) {
 		String_Append(&buf, cur);
 	}
 
-	ssize_t pos = String_Find(buf.prot, ' ');
+	ssize_t pos = String_Find(buf.rd, ' ');
 
 	if (pos != String_NotFound) {
-		token->cmd.name   = String_Clone(String_Slice(buf.prot, 0, pos));
-		token->cmd.params = String_Clone(String_Slice(buf.prot, pos + 1));
+		token->cmd.name   = String_Clone(String_Slice(buf.rd, 0, pos));
+		token->cmd.params = String_Clone(String_Slice(buf.rd, pos + 1));
 	} else {
-		token->cmd.name   = String_Clone(String_Slice(buf.prot, 0));
+		token->cmd.name   = String_Clone(String_Slice(buf.rd, 0));
 		token->cmd.params = String_New(0);
 	}
 

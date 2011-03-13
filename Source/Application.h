@@ -36,7 +36,7 @@ class {
 
 rsdef(self, New);
 def(void, Destroy);
-def(bool, SetOption, ProtString name, ProtString value);
+def(bool, SetOption, RdString name, RdString value);
 def(void, Process);
 
 #undef self

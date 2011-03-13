@@ -4,7 +4,7 @@ extern Logger logger;
 
 #define self Output
 
-static def(void, Open, ProtString path, File *file, BufferedStream *stream) {
+static def(void, Open, RdString path, File *file, BufferedStream *stream) {
 	try {
 		File_Open(file, path,
 			FileStatus_Create    |
@@ -24,15 +24,15 @@ static def(void, Open, ProtString path, File *file, BufferedStream *stream) {
 	} tryEnd;
 }
 
-def(void, Init, ProtString file, bool itf) {
+def(void, Init, RdString file, bool itf) {
 	this->itf = itf;
 	this->className = String_New(0);
 
 	String src = String_Concat(file, $(".c"));
 	String hdr = String_Concat(file, $(".h"));
 
-	call(Open, src.prot, &this->srcFile, &this->src);
-	call(Open, hdr.prot, &this->hdrFile, &this->hdr);
+	call(Open, src.rd, &this->srcFile, &this->src);
+	call(Open, hdr.rd, &this->hdrFile, &this->hdr);
 
 	String_Destroy(&hdr);
 	String_Destroy(&src);
@@ -48,11 +48,11 @@ def(void, Destroy) {
 	BufferedStream_Destroy(&this->hdr);
 }
 
-static def(void, WriteSourceString, ProtString s) {
+static def(void, WriteSourceString, RdString s) {
 	BufferedStream_Write(&this->src, s.buf, s.len);
 }
 
-static def(void, WriteHeaderString, ProtString s) {
+static def(void, WriteHeaderString, RdString s) {
 	BufferedStream_Write(&this->hdr, s.buf, s.len);
 }
 
@@ -70,30 +70,30 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 	String_Append(&res, $("void "));
 
 	if (!method->block) {
-		String_Append(&res, this->className.prot);
+		String_Append(&res, this->className.rd);
 		String_Append(&res, $("_"));
 	}
 
-	String_Append(&res, method->name.prot);
+	String_Append(&res, method->name.rd);
 	String_Append(&res, $("("));
 
 	if (method->block) {
-		String_Append(&res, method->params.prot);
+		String_Append(&res, method->params.rd);
 
 		if (method->params.len > 0) {
 			String_Append(&res, $(", "));
 		}
 	} else {
-		String_Append(&res, method->name.prot);
+		String_Append(&res, method->name.rd);
 		String_Append(&res, $("Template *tpl, "));
 	}
 
 	String_Append(&res, $("String *res)"));
 
 	if (src) {
-		call(WriteSourceString, res.prot);
+		call(WriteSourceString, res.rd);
 	} else {
-		call(WriteHeaderString, res.prot);
+		call(WriteHeaderString, res.rd);
 	}
 
 	String_Destroy(&res);
@@ -103,11 +103,11 @@ static def(void, WriteSource, Method_List *methods) {
 	call(WriteSourceString, Output_Warning);
 
 	call(WriteSourceString, $("#import \""));
-	call(WriteSourceString, this->className.prot);
+	call(WriteSourceString, this->className.rd);
 	call(WriteSourceString, $(".h\"\n\n"));
 
 	call(WriteSourceString, $("#define self "));
-	call(WriteSourceString, this->className.prot);
+	call(WriteSourceString, this->className.rd);
 	call(WriteSourceString, $("\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
@@ -121,11 +121,11 @@ static def(void, WriteSource, Method_List *methods) {
 			call(WriteSourceString, $(" {\n"));
 
 			LinkedList_Foreach(&method->lines, lineNode) {
-				repeat (lineNode->indent + 1) {
+				rpt(lineNode->indent + 1) {
 					call(WriteSourceString, $("\t"));
 				}
 
-				call(WriteSourceString, lineNode->line.prot);
+				call(WriteSourceString, lineNode->line.rd);
 				call(WriteSourceString, $("\n"));
 			}
 
@@ -135,7 +135,7 @@ static def(void, WriteSource, Method_List *methods) {
 
 	if (this->itf) {
 		call(WriteSourceString, $("TemplateInterface Templates_"));
-		call(WriteSourceString, this->className.prot);
+		call(WriteSourceString, this->className.rd);
 		call(WriteSourceString, $(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
@@ -145,15 +145,15 @@ static def(void, WriteSource, Method_List *methods) {
 				continue;
 			}
 
-			String name = String_Clone(method->name.prot);
+			String name = String_Clone(method->name.rd);
 			name.buf[0] = (char) Char_ToLower(name.buf[0]);
 
 			call(WriteSourceString, $("\t."));
-			call(WriteSourceString, name.prot);
+			call(WriteSourceString, name.rd);
 			call(WriteSourceString, $(" = &"));
-			call(WriteSourceString, this->className.prot);
+			call(WriteSourceString, this->className.rd);
 			call(WriteSourceString, $("_"));
-			call(WriteSourceString, method->name.prot);
+			call(WriteSourceString, method->name.rd);
 			call(WriteSourceString, $(",\n"));
 
 			String_Destroy(&name);
@@ -171,16 +171,16 @@ static def(void, WriteHeader, Method_List *methods) {
 	call(WriteHeaderString, $("#import <tplgen/Template.h>\n\n"));
 
 	call(WriteHeaderString, $("#import \""));
-	call(WriteHeaderString, this->className.prot);
+	call(WriteHeaderString, this->className.rd);
 	call(WriteHeaderString, $(".private.h\"\n\n"));
 
 	call(WriteHeaderString, $("#define self "));
-	call(WriteHeaderString, this->className.prot);
+	call(WriteHeaderString, this->className.rd);
 	call(WriteHeaderString, $("\n\n"));
 
 	if (this->itf) {
 		call(WriteHeaderString, $("TemplateInterface Templates_"));
-		call(WriteHeaderString, this->className.prot);
+		call(WriteHeaderString, this->className.rd);
 		call(WriteHeaderString, $(";"));
 	} else {
 		DoublyLinkedList_ReverseForeach(methods, node) {

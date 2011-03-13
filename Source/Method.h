@@ -45,7 +45,7 @@ def(void, SetBlock, bool value);
 def(void, SetParameters, String value);
 def(void, Destroy);
 overload def(void, AddLine, String line);
-overload def(void, AddLine, ProtString line);
+overload def(void, AddLine, OmniString line);
 def(void, Indent);
 def(void, Unindent);
 
