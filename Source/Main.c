@@ -21,15 +21,8 @@ void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String 
 }
 
 int main(int argc, char **argv) {
-	term = Terminal_New(File_StdIn, File_StdOut, false);
-
-	Logger_Init(&logger, Callback(NULL, &OnLogMessage),
-		Logger_Level_Fatal |
-		Logger_Level_Crit  |
-		Logger_Level_Error |
-		Logger_Level_Warn  |
-		Logger_Level_Info  |
-		Logger_Level_Trace);
+	term   = Terminal_New(File_StdIn, File_StdOut, false);
+	logger = Logger_New(Callback(NULL, &OnLogMessage));
 
 	if (argc <= 1) {
 		Logger_Error(&logger, $("No parameters specified."));
