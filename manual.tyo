@@ -19,14 +19,11 @@
 }
 
 .chapter[Installation] {
-	First make sure you have
-	.url[http://tindzk.github.com/Jivai/]{Jivai} and
-	.url[http://tindzk.github.com/Jivai-Utils/]{Jivai-Utils}
-	installed. Then, execute:
+	First make sure you have .url[../Jivai]{Jivai} and .url[../Depend]{Depend} installed. Then, execute:
 
 	.command {
 		git clone git://github.com/tindzk/tplgen.git
-		cd tplgen; ./build.sh
+		cd tplgen ; ./build.sh
 	}
 }
 
@@ -104,7 +101,7 @@
 		.code {
 			#import "TemplateInterface.h"
 
-			TemplateInterface Templates_Default;
+			extern TemplateInterface Templates_Default;
 		}
 
 		.note {
@@ -140,46 +137,22 @@
 }
 
 .chapter[Performance] {
-	If the template's length is not predictable, you shouldn't
+	As the template's final length is not predictable, you shouldn't
 	disable .keyword{String_SmartAlign}. Otherwise, the generation
 	will result in many slow reallocations of the output string.
 }
 
-.chapter[License] {
-	.p {
-		Licensed under the EUPL, Version 1.1 only (the
-		.i{"Licence"}); You may not use this work except in
-		compliance with the Licence.
+.chapter[Appendix] {
+	.section[License] {
+		Licensed under the EUPL, Version 1.1 only (the .i{"Licence"}); You may not use this work except in compliance with the Licence.
 	}
 
-	.p {
-		You may obtain a copy of the Licence at:
-
-		.url[http://ec.europa.eu/idabc/eupl] {
-			http://ec.europa.eu/idabc/eupl
+	.section[See also] {
+		.list {
+			.item{.url[http://github.com/tindzk/tplgen]{Browse source}}
+			.item{.url[http://github.com/tindzk/tplgen/issues]{Bug tracker}}
+			.item{.url[http://tindzk.github.com/]{Other projects}}
+			.item{.mail[tim.nieradzik@gmx.de]{Contact}}
 		}
 	}
-
-	.p {
-		Unless required by applicable law or agreed to in writing,
-		software distributed under the Licence is distributed on an
-		"AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-		either express or implied.
-	}
-
-	.p {
-		See the Licence for the specific language governing
-		permissions and limitations under the Licence.
-	}
-}
-
-.chapter[See also] {
-	.list {
-		.item{.url[http://github.com/tindzk/tplgen]{Browse source}}
-		.item{.url[http://github.com/tindzk]{GitHub account}}
-	}
-}
-
-.chapter[Contact] {
-	.mail[tim.nieradzik@gmx.de]{Tim Nieradzik}
 }
