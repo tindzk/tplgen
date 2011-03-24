@@ -4,7 +4,7 @@ extern Logger logger;
 
 #define self Output
 
-static def(void, Open, RdString path, File *file, BufferedStream *stream) {
+static odef(void, open, RdString path, File *file, BufferedStream *stream) {
 	try {
 		File_Open(file, path,
 			FileStatus_Create    |
@@ -24,21 +24,21 @@ static def(void, Open, RdString path, File *file, BufferedStream *stream) {
 	} tryEnd;
 }
 
-def(void, Init, RdString file, bool itf) {
+odef(void, init, RdString file, bool itf) {
 	this->itf = itf;
 	this->className = String_New(0);
 
 	String src = String_Concat(file, $(".c"));
 	String hdr = String_Concat(file, $(".h"));
 
-	call(Open, src.rd, &this->srcFile, &this->src);
-	call(Open, hdr.rd, &this->hdrFile, &this->hdr);
+	open(this, src.rd, &this->srcFile, &this->src);
+	open(this, hdr.rd, &this->hdrFile, &this->hdr);
 
 	String_Destroy(&hdr);
 	String_Destroy(&src);
 }
 
-def(void, Destroy) {
+odef(void, destroy) {
 	String_Destroy(&this->className);
 
 	BufferedStream_Close(&this->src);
@@ -48,19 +48,19 @@ def(void, Destroy) {
 	BufferedStream_Destroy(&this->hdr);
 }
 
-static def(void, WriteSourceString, RdString s) {
+static odef(void, writeSourceString, RdString s) {
 	BufferedStream_Write(&this->src, s.buf, s.len);
 }
 
-static def(void, WriteHeaderString, RdString s) {
+static odef(void, writeHeaderString, RdString s) {
 	BufferedStream_Write(&this->hdr, s.buf, s.len);
 }
 
-def(void, SetClassName, String s) {
+odef(void, setClassName, String s) {
 	String_Assign(&this->className, s);
 }
 
-static def(void, WriteDeclaration, Method *method, bool src) {
+static odef(void, writeDeclaration, Method *method, bool src) {
 	String res = String_New(0);
 
 	if (method->hidden) {
@@ -91,24 +91,24 @@ static def(void, WriteDeclaration, Method *method, bool src) {
 	String_Append(&res, $("String *res)"));
 
 	if (src) {
-		call(WriteSourceString, res.rd);
+		writeSourceString(this, res.rd);
 	} else {
-		call(WriteHeaderString, res.rd);
+		writeHeaderString(this, res.rd);
 	}
 
 	String_Destroy(&res);
 }
 
-static def(void, WriteSource, Method_List *methods) {
-	call(WriteSourceString, Output_Warning);
+static odef(void, writeSource, Method_List *methods) {
+	writeSourceString(this, Output_Warning);
 
-	call(WriteSourceString, $("#import \""));
-	call(WriteSourceString, this->className.rd);
-	call(WriteSourceString, $(".h\"\n\n"));
+	writeSourceString(this, $("#import \""));
+	writeSourceString(this, this->className.rd);
+	writeSourceString(this, $(".h\"\n\n"));
 
-	call(WriteSourceString, $("#define self "));
-	call(WriteSourceString, this->className.rd);
-	call(WriteSourceString, $("\n\n"));
+	writeSourceString(this, $("#define self "));
+	writeSourceString(this, this->className.rd);
+	writeSourceString(this, $("\n\n"));
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
@@ -117,26 +117,26 @@ static def(void, WriteSource, Method_List *methods) {
 
 		/* Omit empty methods. */
 		if (method->lines.first != NULL) {
-			call(WriteDeclaration, method, true);
-			call(WriteSourceString, $(" {\n"));
+			writeDeclaration(this, method, true);
+			writeSourceString(this, $(" {\n"));
 
 			LinkedList_Foreach(&method->lines, lineNode) {
 				rpt(lineNode->indent + 1) {
-					call(WriteSourceString, $("\t"));
+					writeSourceString(this, $("\t"));
 				}
 
-				call(WriteSourceString, lineNode->line.rd);
-				call(WriteSourceString, $("\n"));
+				writeSourceString(this, lineNode->line.rd);
+				writeSourceString(this, $("\n"));
 			}
 
-			call(WriteSourceString, $("}\n\n"));
+			writeSourceString(this, $("}\n\n"));
 		}
 	}
 
 	if (this->itf) {
-		call(WriteSourceString, $("TemplateInterface Templates_"));
-		call(WriteSourceString, this->className.rd);
-		call(WriteSourceString, $(" = {\n"));
+		writeSourceString(this, $("TemplateInterface Templates_"));
+		writeSourceString(this, this->className.rd);
+		writeSourceString(this, $(" = {\n"));
 
 		LinkedList_Foreach(methods, node) {
 			Method *method = Method_GetObject(node->method);
@@ -148,55 +148,55 @@ static def(void, WriteSource, Method_List *methods) {
 			String name = String_Clone(method->name.rd);
 			name.buf[0] = (char) Char_ToLower(name.buf[0]);
 
-			call(WriteSourceString, $("\t."));
-			call(WriteSourceString, name.rd);
-			call(WriteSourceString, $(" = &"));
-			call(WriteSourceString, this->className.rd);
-			call(WriteSourceString, $("_"));
-			call(WriteSourceString, method->name.rd);
-			call(WriteSourceString, $(",\n"));
+			writeSourceString(this, $("\t."));
+			writeSourceString(this, name.rd);
+			writeSourceString(this, $(" = &"));
+			writeSourceString(this, this->className.rd);
+			writeSourceString(this, $("_"));
+			writeSourceString(this, method->name.rd);
+			writeSourceString(this, $(",\n"));
 
 			String_Destroy(&name);
 		}
 
-		call(WriteSourceString, $("};"));
+		writeSourceString(this, $("};"));
 	}
 }
 
-static def(void, WriteHeader, Method_List *methods) {
-	call(WriteHeaderString, Output_Warning);
+static odef(void, writeHeader, Method_List *methods) {
+	writeHeaderString(this, Output_Warning);
 
-	call(WriteHeaderString, $("#import <String.h>\n"));
-	call(WriteHeaderString, $("#import <Integer.h>\n"));
-	call(WriteHeaderString, $("#import <tplgen/Template.h>\n\n"));
+	writeHeaderString(this, $("#import <String.h>\n"));
+	writeHeaderString(this, $("#import <Integer.h>\n"));
+	writeHeaderString(this, $("#import <tplgen/Template.h>\n\n"));
 
-	call(WriteHeaderString, $("#import \""));
-	call(WriteHeaderString, this->className.rd);
-	call(WriteHeaderString, $(".private.h\"\n\n"));
+	writeHeaderString(this, $("#import \""));
+	writeHeaderString(this, this->className.rd);
+	writeHeaderString(this, $(".private.h\"\n\n"));
 
-	call(WriteHeaderString, $("#define self "));
-	call(WriteHeaderString, this->className.rd);
-	call(WriteHeaderString, $("\n\n"));
+	writeHeaderString(this, $("#define self "));
+	writeHeaderString(this, this->className.rd);
+	writeHeaderString(this, $("\n\n"));
 
 	if (this->itf) {
-		call(WriteHeaderString, $("TemplateInterface Templates_"));
-		call(WriteHeaderString, this->className.rd);
-		call(WriteHeaderString, $(";"));
+		writeHeaderString(this, $("TemplateInterface Templates_"));
+		writeHeaderString(this, this->className.rd);
+		writeHeaderString(this, $(";"));
 	} else {
 		DoublyLinkedList_ReverseForeach(methods, node) {
 			Method *method = Method_GetObject(node->method);
 
 			if (method->lines.first != NULL) {
-				call(WriteDeclaration, method, false);
-				call(WriteHeaderString, $(";\n"));
+				writeDeclaration(this, method, false);
+				writeHeaderString(this, $(";\n"));
 			}
 		}
 	}
 
-	call(WriteHeaderString, $("\n#undef self\n"));
+	writeHeaderString(this, $("\n#undef self\n"));
 }
 
-def(void, Write, Method_List *methods) {
-	call(WriteHeader, methods);
-	call(WriteSource, methods);
+odef(void, write, Method_List *methods) {
+	writeHeader(this, methods);
+	writeSource(this, methods);
 }

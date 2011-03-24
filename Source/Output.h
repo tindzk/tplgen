@@ -27,9 +27,9 @@ class {
 	BufferedStream hdr;
 };
 
-def(void, Init, RdString file, bool itf);
-def(void, Destroy);
-def(void, SetClassName, String s);
-def(void, Write, Method_List *methods);
+odef(void, init, RdString file, bool itf);
+odef(void, destroy);
+odef(void, setClassName, String s);
+odef(void, write, Method_List *methods);
 
 #undef self

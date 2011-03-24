@@ -35,8 +35,8 @@ class {
 };
 
 rsdef(self, New);
-def(void, Destroy);
-def(bool, SetOption, RdString name, RdString value);
-def(void, Process);
+odef(void, destroy);
+odef(bool, setOption, RdString name, RdString value);
+odef(void, process);
 
 #undef self

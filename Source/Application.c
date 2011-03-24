@@ -19,7 +19,7 @@ rsdef(self, New) {
 	return res;
 }
 
-def(void, Destroy) {
+odef(void, destroy) {
 	String_Destroy(&this->dir);
 	String_Destroy(&this->ext);
 	String_Destroy(&this->out);
@@ -38,7 +38,7 @@ def(void, Destroy) {
 	scall(TemplateArray_Free, this->files);
 }
 
-def(bool, SetOption, RdString name, RdString value) {
+odef(bool, setOption, RdString name, RdString value) {
 	if (String_Equals(name, $("name"))) {
 		String_Copy(&this->name, value);
 	} else if (String_Equals(name, $("itf"))) {
@@ -70,7 +70,7 @@ def(bool, SetOption, RdString name, RdString value) {
 	return true;
 }
 
-static def(String, FormatVariables, RdString s) {
+static odef(String, formatVariables, RdString s) {
 	String tmp = String_Clone(s);
 
 	String_ReplaceAll(&tmp, $("#"), $("tpl->"));
@@ -79,9 +79,9 @@ static def(String, FormatVariables, RdString s) {
 	return tmp;
 }
 
-static def(void, HandlePrintVariable, MethodInstance method, RdString s, RdString s2) {
-	String var  = call(FormatVariables, s);
-	String var2 = call(FormatVariables, s2);
+static odef(void, handlePrintVariable, Method *method, RdString s, RdString s2) {
+	String var  = formatVariables(this, s);
+	String var2 = formatVariables(this, s2);
 
 	Method_AddLine(method,
 		String_Format($("Template_Print(%%, res);"),
@@ -91,8 +91,8 @@ static def(void, HandlePrintVariable, MethodInstance method, RdString s, RdStrin
 	String_Destroy(&var);
 }
 
-static def(void, HandleTemplate, MethodInstance method, RdString s) {
-	String var = call(FormatVariables, s);
+static odef(void, handleTemplate, Method *method, RdString s) {
+	String var = formatVariables(this, s);
 
 	Method_AddLine(method,
 		String_Format($("callback(%, res);"), var.rd));
@@ -100,8 +100,8 @@ static def(void, HandleTemplate, MethodInstance method, RdString s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleIf, MethodInstance method, RdString s) {
-	String var = call(FormatVariables, s);
+static odef(void, handleIf, Method *method, RdString s) {
+	String var = formatVariables(this, s);
 
 	Method_AddLine(method,
 		String_Format($("if (%) {"), var.rd));
@@ -110,8 +110,8 @@ static def(void, HandleIf, MethodInstance method, RdString s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleIfEmpty, MethodInstance method, RdString s) {
-	String var = call(FormatVariables, s);
+static odef(void, handleIfEmpty, Method *method, RdString s) {
+	String var = formatVariables(this, s);
 
 	Method_AddLine(method,
 		String_Format($("if (%.len == 0) {"), var.rd));
@@ -120,14 +120,14 @@ static def(void, HandleIfEmpty, MethodInstance method, RdString s) {
 	String_Destroy(&var);
 }
 
-static def(void, HandleElse, MethodInstance method, RdString s) {
+static odef(void, handleElse, Method *method, RdString s) {
 	Method_Unindent(method);
 
 	if (s.len == 0) {
 		Method_AddLine(method, $$("} else {"));
 		Method_Indent(method);
 	} else {
-		String var = call(FormatVariables, s);
+		String var = formatVariables(this, s);
 
 		Method_AddLine(method,
 			String_Format($("} else if (%) {"), var.rd));
@@ -137,12 +137,12 @@ static def(void, HandleElse, MethodInstance method, RdString s) {
 	}
 }
 
-static def(void, HandleEnd, MethodInstance method) {
+static odef(void, handleEnd, Method *method) {
 	Method_Unindent(method);
 	Method_AddLine(method, $$("}"));
 }
 
-static def(void, HandleBlock, MethodInstance method, RdString params) {
+static odef(void, handleBlock, Method *method, RdString params) {
 	ssize_t offset = String_Find(params, ' ');
 
 	String line;
@@ -150,7 +150,7 @@ static def(void, HandleBlock, MethodInstance method, RdString params) {
 	if (offset == String_NotFound) {
 		line = String_Format($("%(res);"), params);
 	} else {
-		String var = call(FormatVariables,
+		String var = formatVariables(this,
 			String_Slice(params, offset + 1));
 
 		line = String_Format($("%(%, res);"),
@@ -163,7 +163,7 @@ static def(void, HandleBlock, MethodInstance method, RdString params) {
 	Method_AddLine(method, line);
 }
 
-static def(void, HandleFor, MethodInstance method, RdString params) {
+static odef(void, handleFor, Method *method, RdString params) {
 	RdStringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
@@ -171,9 +171,9 @@ static def(void, HandleFor, MethodInstance method, RdString params) {
 		throw(ParsingFailed);
 	}
 
-	String iter = call(FormatVariables, parts->buf[0]);
+	String iter = formatVariables(this, parts->buf[0]);
 	RdString option = parts->buf[1];
-	String from = call(FormatVariables, parts->buf[2]);
+	String from = formatVariables(this, parts->buf[2]);
 
 	if (!String_Equals(option, $("in"))) {
 		Logger_Error(&logger, $("For loops don't support '%'"),
@@ -215,8 +215,8 @@ static def(void, HandleFor, MethodInstance method, RdString params) {
 	RdStringArray_Free(parts);
 }
 
-static def(void, HandlePass, MethodInstance method, RdString name, RdString params) {
-	String vars = call(FormatVariables, params);
+static odef(void, handlePass, Method *method, RdString name, RdString params) {
+	String vars = formatVariables(this, params);
 
 	Method_AddLine(method,
 		String_Format($("Template_Print(%(%), res);"),
@@ -226,38 +226,36 @@ static def(void, HandlePass, MethodInstance method, RdString name, RdString para
 	String_Destroy(&vars);
 }
 
-static def(void, HandleCommand, MethodInstance method, RdString name, RdString params) {
+static odef(void, handleCommand, Method *method, RdString name, RdString params) {
 	if (name.len == 0) {
 		return;
 	}
 
 	if (name.buf[0] == '$' || name.buf[0] == '#') {
-		call(HandlePrintVariable, method, name, params);
+		handlePrintVariable(this, method, name, params);
 	} else if (name.buf[0] == '~') {
-		call(HandlePass, method, name, params);
+		handlePass(this, method, name, params);
 	} else if (String_Equals(name, $("for"))) {
-		call(HandleFor, method, params);
+		handleFor(this, method, params);
 	} else if (String_Equals(name, $("if"))) {
-		call(HandleIf, method, params);
+		handleIf(this, method, params);
 	} else if (String_Equals(name, $("empty"))) {
-		call(HandleIfEmpty, method, params);
+		handleIfEmpty(this, method, params);
 	} else if (String_Equals(name, $("else"))) {
-		call(HandleElse, method, params);
+		handleElse(this, method, params);
 	} else if (String_Equals(name, $("end"))) {
-		call(HandleEnd, method);
+		handleEnd(this, method);
 	} else if (String_Equals(name, $("block"))) {
-		call(HandleBlock, method, params);
+		handleBlock(this, method, params);
 	} else if (String_Equals(name, $("tpl"))) {
-		call(HandleTemplate, method, params);
+		handleTemplate(this, method, params);
 	} else {
-		Logger_Error(&logger, $("Command '%' is unknown."),
-			name);
-
+		Logger_Error(&logger, $("Command '%' is unknown."), name);
 		throw(ParsingFailed);
 	}
 }
 
-static def(String, EscapeLine, RdString s) {
+static odef(String, escapeLine, RdString s) {
 	String res = String_New(s.len + 15);
 
 	fwd(i, s.len) {
@@ -271,7 +269,7 @@ static def(String, EscapeLine, RdString s) {
 	return res;
 }
 
-static def(void, FlushBuf, MethodInstance method, RdString s) {
+static odef(void, flushBuf, Method *method, RdString s) {
 	if (s.len == 0) {
 		return;
 	}
@@ -289,7 +287,7 @@ static def(void, FlushBuf, MethodInstance method, RdString s) {
 			flushed = true;
 		}
 
-		String escaped = call(EscapeLine, line);
+		String escaped = escapeLine(this, line);
 
 		RdString nl = $("");
 		if (items->len > 1) {
@@ -313,7 +311,7 @@ static def(void, FlushBuf, MethodInstance method, RdString s) {
 	RdStringArray_Free(items);
 }
 
-static def(Method *, NewMethod, String name) {
+static odef(Method *, newMethod, String name) {
 	Method *method = Method_Alloc();
 
 	Method_Init(method, name, this->itf);
@@ -327,7 +325,7 @@ static def(Method *, NewMethod, String name) {
 	return method;
 }
 
-static def(Method *, NewBlockMethod, String name, String params, bool public) {
+static odef(Method *, newBlockMethod, String name, String params, bool public) {
 	Method *method = Method_Alloc();
 
 	Method_Init(method, name, !public);
@@ -344,19 +342,19 @@ static def(Method *, NewBlockMethod, String name, String params, bool public) {
 	return method;
 }
 
-static def(bool, StartsCommandBlock, RdString cmd) {
+static odef(bool, startsCommandBlock, RdString cmd) {
 	return String_Equals(cmd, $("if"))
 		|| String_Equals(cmd, $("for"))
 		|| String_Equals(cmd, $("else"))
 		|| String_Equals(cmd, $("empty"));
 }
 
-static def(bool, EndsCommandBlock, RdString cmd) {
+static odef(bool, endsCommandBlock, RdString cmd) {
 	return String_Equals(cmd, $("end"))
 		|| String_Equals(cmd, $("else"));
 }
 
-static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInstance method) {
+static odef(void, parseTemplate, Parser *parser, bool inBlock, Method *method) {
 	Parser_Token prev = Parser_Token();
 	Parser_Token cur  = Parser_Token();
 	Parser_Token next = Parser_Token();
@@ -367,7 +365,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 		if (cur.state == Parser_State_Text) {
 			RdString text = cur.text.rd;
 
-			if ((prev.state == Parser_State_Command && call(StartsCommandBlock, prev.cmd.name.rd))
+			if ((prev.state == Parser_State_Command && startsCommandBlock(this, prev.cmd.name.rd))
 			  || first)
 			{
 				text  = String_Trim(text, String_TrimLeft);
@@ -376,17 +374,17 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 
 			next = Parser_Fetch(parser);
 
-			if ((next.state == Parser_State_Command && call(EndsCommandBlock, next.cmd.name.rd))
+			if ((next.state == Parser_State_Command && endsCommandBlock(this, next.cmd.name.rd))
 			  || next.state == Parser_State_Block
 			  || next.state == Parser_State_None)
 			{
 				text = String_Trim(text, String_TrimRight);
 			}
 
-			call(FlushBuf, method, text);
+			flushBuf(this, method, text);
 		} else {
 			if (cur.state == Parser_State_Command) {
-				call(HandleCommand, method,
+				handleCommand(this, method,
 					cur.cmd.name.rd,
 					cur.cmd.params.rd);
 			} else if (cur.state == Parser_State_Block) {
@@ -409,7 +407,7 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 
 				if (pos != String_NotFound) {
 					blkname   = String_Slice(cur.block.rd, 0, pos);
-					blkparams = call(FormatVariables,
+					blkparams = formatVariables(this,
 						String_Slice(cur.block.rd, pos + 2));
 				}
 
@@ -421,8 +419,8 @@ static def(void, ParseTemplate, ParserInstance parser, bool inBlock, MethodInsta
 				}
 
 				Method *blockMethod =
-					call(NewBlockMethod, String_Clone(blkname), blkparams, public);
-				call(ParseTemplate, parser, true, blockMethod);
+					newBlockMethod(this, String_Clone(blkname), blkparams, public);
+				parseTemplate(this, parser, true, blockMethod);
 			}
 
 			next = Parser_Fetch(parser);
@@ -441,7 +439,7 @@ out:
 	Parser_DestroyToken(&cur);
 }
 
-def(void, Scan) {
+odef(void, scan) {
 	Directory dir;
 	Directory_Entry item;
 	Directory_Init(&dir, this->dir.rd);
@@ -470,19 +468,19 @@ def(void, Scan) {
 	Directory_Destroy(&dir);
 }
 
-def(void, Process) {
+odef(void, process) {
 	if (this->out.len == 0) {
 		Logger_Error(&logger, $("No output path is set."));
 		throw(InvalidParameter);
 	}
 
 	if (this->dir.len > 0) {
-		call(Scan);
+		scan(this);
 	}
 
 	Output output;
-	Output_Init(&output, this->out.rd, this->itf);
-	Output_SetClassName(&output, String_Clone(this->name.rd));
+	init(&output, this->out.rd, this->itf);
+	setClassName(&output, String_Clone(this->name.rd));
 
 	fwd(i, this->files->len) {
 		Logger_Info(&logger, $("Processing %..."),
@@ -498,14 +496,14 @@ def(void, Process) {
 		Parser parser;
 		Parser_Init(&parser, BufferedStream_AsStream(&stream));
 
-		Method *method = call(NewMethod,
+		Method *method = newMethod(this,
 			String_Clone(this->files->buf[i].name.rd));
-		call(ParseTemplate, &parser, false, method);
+		parseTemplate(this, &parser, false, method);
 
 		BufferedStream_Close(&stream);
 		BufferedStream_Destroy(&stream);
 	}
 
-	Output_Write(&output, &this->methods);
-	Output_Destroy(&output);
+	write(&output, &this->methods);
+	destroy(&output);
 }

@@ -9,7 +9,7 @@
 Logger logger;
 Terminal term;
 
-void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String file, int line) {
+void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, RdString file, int line) {
 	RdString slevel = Logger_ResolveLevel(level);
 	String sline = Integer_ToString(line);
 
@@ -21,8 +21,8 @@ void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, String 
 }
 
 int main(int argc, char **argv) {
-	term   = Terminal_New(File_StdIn, File_StdOut, false);
-	logger = Logger_New(Callback(NULL, &OnLogMessage));
+	term   = Terminal_New(false);
+	logger = Logger_New(Callback(NULL, OnLogMessage));
 
 	if (argc <= 1) {
 		Logger_Error(&logger, $("No parameters specified."));
@@ -43,18 +43,18 @@ int main(int argc, char **argv) {
 		RdString name  = String_Slice(arg, 0, pos);
 		RdString value = String_Slice(arg, pos + 1);
 
-		if (!Application_SetOption(&app, name, value)) {
+		if (!setOption(&app, name, value)) {
 			return ExitStatus_Failure;
 		}
 	}
 
 	try {
-		Application_Process(&app);
+		process(&app);
 	} catchAny {
 		Exception_Print(e);
 		excReturn ExitStatus_Failure;
 	} finally {
-		Application_Destroy(&app);
+		destroy(&app);
 		Terminal_Destroy(&term);
 	} tryEnd;
 
