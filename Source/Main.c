@@ -22,7 +22,7 @@ void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, RdStrin
 
 int main(int argc, char **argv) {
 	term   = Terminal_New(false);
-	logger = Logger_New(Callback(NULL, OnLogMessage));
+	logger = Logger_New(Logger_Printer_For(NULL, OnLogMessage));
 
 	if (argc <= 1) {
 		Logger_Error(&logger, $("No parameters specified."));

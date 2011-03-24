@@ -5,7 +5,7 @@
 #import <Date/RFC822.h>
 #import <HTML/Entities.h>
 
-DefineCallback(Template, void, String *);
+Callback(Template, void, String *);
 
 #define tpl(name)                                                                  \
 	struct simpleConcat(name, Template);                                           \
@@ -13,9 +13,10 @@ DefineCallback(Template, void, String *);
 	static overload alwaysInline Template render(                                  \
 		union { struct simpleConcat(name, Template) *addr; } transparentUnion $ptr \
 	) {                                                                            \
-		return (Template) Callback(                                                \
-			Generic_FromObject($ptr.addr),                                         \
-			Template_##name);                                                      \
+		return (Template) {                                                        \
+			.context = Generic_FromObject($ptr.addr),                              \
+			.cb      = (void *) Template_##name                                    \
+		};                                                                         \
 	}                                                                              \
 	record(simpleConcat(name, Template))
 
