@@ -3,7 +3,7 @@
 
 record(Article) {
 	size_t id;
-	ProtString title;
+	RdString title;
 };
 
 #define Article(id, title) (Article) { id, title }

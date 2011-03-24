@@ -9,7 +9,7 @@ mkdir -p Build/Jivai
 	itf=no              \
 	out=Source/Template || exit 1
 
-../../Jivai-Utils/jutils.bin        \
+../../Depend/Depend.bin             \
 	build                           \
 	output=Main.bin                 \
 	main=Source/Main.c              \

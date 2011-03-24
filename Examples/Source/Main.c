@@ -30,14 +30,14 @@ int main(__unused int argc, __unused char *argv[]) {
 
 	String_Print($("Listing template:\n"));
 	printListing(&res, articles);
-	String_Print(res.prot);
+	String_Print(res.rd);
 
 	String_Print($("\n\n"));
 	res.len = 0;
 
 	String_Print($("Article template:\n"));
 	printArticle(&res, articles->buf[1]);
-	String_Print(res.prot);
+	String_Print(res.rd);
 
 	String_Print($("\n"));
 
