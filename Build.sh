@@ -2,7 +2,7 @@
 
 mkdir -p Build/{tplgen,Jivai}
 
-../Jivai-Utils/jutils.bin        \
+../Depend/Depend.bin             \
 	build                        \
 	output=tplgen.bin            \
 	main=Source/Main.c           \
