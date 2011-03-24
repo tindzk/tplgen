@@ -10,7 +10,7 @@ DefineCallback(Template, void, String *);
 #define tpl(name)                                                                  \
 	struct simpleConcat(name, Template);                                           \
 	void Template_##name(struct simpleConcat(name, Template) *tpl, String *res);   \
-	static inline Template tpl##name(                                              \
+	static overload alwaysInline Template render(                                  \
 		union { struct simpleConcat(name, Template) *addr; } transparentUnion $ptr \
 	) {                                                                            \
 		return (Template) Callback(                                                \
