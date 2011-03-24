@@ -1,21 +1,17 @@
 .meta {
 	.title{tplgen}
 	.subtitle{Template Generator}
+	.author{Tim Nieradzik}
 }
 
 .chapter[Introduction] {
-	.i{tplgen} is a lightweight template system. It can be used to
-	create interactive websites written in C.
+	.i{tplgen} is a lightweight template system. It can be used to create interactive websites written in C.
 
-	tplgen doesn't require complex configuration. All options are
-	passed via command line parameters.
+	tplgen doesn't require complex configuration. All options are passed via command line parameters.
 
-	Templates are written in a simple markup. tplgen compiles them
-	to valid C code.
+	Templates are written in a simple markup. tplgen compiles them to valid C code.
 
-	Templates can contain variables, loops, comparisons and even
-	sub-routines. It's also possible to nest templates and
-	to call any function which are defined somewhere else in the code.
+	Templates can contain variables, loops, comparisons and even sub-routines. It's also possible to nest templates and to call any function which are defined somewhere else in the code.
 }
 
 .chapter[Installation] {
@@ -23,15 +19,12 @@
 
 	.command {
 		git clone git://github.com/tindzk/tplgen.git
-		cd tplgen ; ./build.sh
+		cd tplgen ; ./Build.sh
 	}
 }
 
 .chapter[Generation] {
-	By default, tplgen will implement a generic interface. This is
-	useful for maintaining multiple themes or output formats.
-	The interface is a structure called .keyword{TemplateInterface}
-	only containing function pointers. It may look like:
+	By default, tplgen will implement a generic interface. This is useful for maintaining multiple themes or output formats. The interface is a structure called .keyword{TemplateInterface} only containing function pointers. It may look like:
 
 	.code {
 		typedef struct \{
@@ -41,11 +34,9 @@
 		\} TemplateInterface;
 	}
 
-	You also need to declare a structure for each template which
-	contains its global members.
+	You also need to declare a structure for each template which contains its global members.
 
-	Assumed you want to create a template for the default theme,
-	you have to call tplgen like this:
+	Assumed you want to create a template for the default theme, you have to call tplgen like this:
 
 	.command {
 		../tplgen/tplgen.bin                     \
@@ -56,8 +47,7 @@
 			out=src/Templates/Default.c
 	}
 
-	If you ensure that each theme directory contains the same file
-	names, you can shorten the command to:
+	If you ensure that each theme directory contains the same file names, you can shorten the command to:
 
 	.command {
 		../tplgen/tplgen.bin \
@@ -68,35 +58,21 @@
 	}
 
 	.warning {
-		This command will include all .path{.html} files in
-		.path{tpl/Default}. Temporarily created files should be
-		moved into a subdirectory, otherwise tplgen tries to
-		interpret them, too.
+		This command will include all .path{.html} files in .path{tpl/Default}. Temporarily created files should be moved into a subdirectory, otherwise tplgen tries to interpret them, too.
 	}
 
 	.section[Creating the Header] {
-		.p {
-			Although tplgen already creates a header file
-			automatically, each template requires a structure
-			containing its member variables. This is usually done in
-			the file .path{<TemplateName>.private.h} which is
-			imported by .path{<TemplateName>.h}.
+		Although tplgen already creates a header file automatically, each template requires a structure containing its member variables. This is usually done in the file .path{<TemplateName>.private.h} which is imported by .path{<TemplateName>.h}.
 
-			.note {
-				You can also define static inline functions which are
-				then usable in the template. One such example is an
-				HTML escaping function.
-			}
+		.note {
+			You can also define static inline functions which are
+			then usable in the template. One such example is an
+			HTML escaping function.
 		}
 	}
 
 	.section[Templates with Interface] {
-		.p {
-			Since you will probably have more than one template,
-			it's recommendable to put the template interface into a
-			separate file and include it from all templates. A
-			generic header file looks like:
-		}
+		Since you will probably have more than one template, it's recommendable to put the template interface into a separate file and include it from all templates. A generic header file looks like:
 
 		.code {
 			#import "TemplateInterface.h"
@@ -105,41 +81,28 @@
 		}
 
 		.note {
-			.func{main()}, .func{article()} and .func{listing()} are
-			defined for each template in the structure
-			.var{Template_<TemplateName>}, i.e.
-			.var{Templates_Default} in this case.
+			.func{main()}, .func{article()} and .func{listing()} are defined for each template in the structure .var{Template_<TemplateName>}, i.e. .var{Templates_Default} in this case.
 		}
 	}
 
 	.section[Templates without Interface] {
-		.p {
-			If having an interface is not desired, you can specify the
-			parameter .keyword{itf=no}. This will lead to a slightly
-			different behaviour:
-		}
+		If having an interface is not desired, you can specify the parameter .keyword{itf=no}. This will lead to a slightly different behaviour:
 
 		.list {
 			.item{TemplateInterface is .i{not} implemented.}
 			.item{All functions are .keyword{public}.}
 		}
 
-		.p {
-			Rather than accessing the template structure, you can
-			now access the functions directly.
-		}
+		Rather than accessing the template structure, you can now access the functions directly.
 	}
 
 	.section[See also] {
-		Also see the .path{examples} directory for a simple
-		application which doesn't use interfaces.
+		Also see the .path{examples} directory for a simple application which doesn't use interfaces.
 	}
 }
 
 .chapter[Performance] {
-	As the template's final length is not predictable, you shouldn't
-	disable .keyword{String_SmartAlign}. Otherwise, the generation
-	will result in many slow reallocations of the output string.
+	As the template's final length is not predictable, you shouldn't disable .keyword{String_SmartAlign}. Otherwise, the generation will result in many slow reallocations of the output string.
 }
 
 .chapter[Appendix] {
