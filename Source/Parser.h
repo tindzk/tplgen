@@ -1,5 +1,5 @@
+#import <Stream.h>
 #import <String.h>
-#import <StreamInterface.h>
 
 #define self Parser
 

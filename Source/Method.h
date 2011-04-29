@@ -40,7 +40,7 @@ MemoryHelpers(ref(Item));
 
 DoublyLinkedList_DeclareList(ref(Item), ref(List));
 
-def(void, Init, String name, bool hidden);
+rsdef(self, New, String name, bool hidden);
 def(void, SetBlock, bool value);
 def(void, SetParameters, String value);
 def(void, Destroy);

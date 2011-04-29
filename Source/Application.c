@@ -5,18 +5,22 @@
 extern Logger logger;
 
 rsdef(self, New) {
-	self res;
+	return (self) {
+		.itf     = true,
+		.dir     = String_New(0),
+		.ext     = String_New(0),
+		.out     = String_New(0),
+		.name    = String_New(0),
+		.files   = scall(TemplateArray_New, 50),
+		.methods = DoublyLinkedList_New()
+	};
+}
 
-	res.itf   = true;
-	res.dir   = String_New(0);
-	res.ext   = String_New(0);
-	res.out   = String_New(0);
-	res.name  = String_New(0);
-	res.files = scall(TemplateArray_New, 50);
+odef(void, destroyItem, GenericInstance inst) {
+	Method_Item *item = inst.object;
 
-	DoublyLinkedList_Init(&res.methods);
-
-	return res;
+	Method_Destroy(item->method);
+	Method_Free(item->method);
 }
 
 odef(void, destroy) {
@@ -25,10 +29,8 @@ odef(void, destroy) {
 	String_Destroy(&this->out);
 	String_Destroy(&this->name);
 
-	DoublyLinkedList_Destroy(&this->methods, ^(Method_Item *item) {
-		Method_Destroy(item->method);
-		Method_Free(item->method);
-	});
+	DoublyLinkedList_Destroy(&this->methods,
+		LinkedList_OnDestroy_For(this, destroyItem));
 
 	each(file, this->files) {
 		String_Destroy(&file->name);
@@ -313,8 +315,7 @@ static odef(void, flushBuf, Method *method, RdString s) {
 
 static odef(Method *, newMethod, String name) {
 	Method *method = Method_Alloc();
-
-	Method_Init(method, name, this->itf);
+	*method = Method_New(name, this->itf);
 
 	Method_Item *item = Method_Item_Alloc();
 
@@ -327,8 +328,7 @@ static odef(Method *, newMethod, String name) {
 
 static odef(Method *, newBlockMethod, String name, String params, bool public) {
 	Method *method = Method_Alloc();
-
-	Method_Init(method, name, !public);
+	*method = Method_New(name, !public);
 
 	Method_SetBlock(method, true);
 	Method_SetParameters(method, params);
@@ -486,9 +486,7 @@ odef(void, process) {
 		Logger_Info(&logger, $("Processing %..."),
 			this->files->buf[i].file.rd);
 
-		File tplFile;
-		FileStream_Open(&tplFile, this->files->buf[i].file.rd,
-			FileStatus_ReadOnly);
+		File tplFile = File_New(this->files->buf[i].file.rd, FileStatus_ReadOnly);
 
 		BufferedStream stream = BufferedStream_New(File_AsStream(&tplFile));
 		BufferedStream_SetInputBuffer(&stream, 4096, 256);

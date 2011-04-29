@@ -6,7 +6,7 @@ extern Logger logger;
 
 static odef(void, open, RdString path, File *file, BufferedStream *stream) {
 	try {
-		File_Open(file, path,
+		*file = File_New(path,
 			FileStatus_Create    |
 			FileStatus_Truncate  |
 			FileStatus_WriteOnly);
@@ -112,7 +112,7 @@ static odef(void, writeSource, Method_List *methods) {
 
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
-	DoublyLinkedList_ReverseForeach(methods, node) {
+	DoublyLinkedList_ReverseEach(methods, node) {
 		Method *method = Method_GetObject(node->method);
 
 		/* Omit empty methods. */
@@ -120,7 +120,7 @@ static odef(void, writeSource, Method_List *methods) {
 			writeDeclaration(this, method, true);
 			writeSourceString(this, $(" {\n"));
 
-			LinkedList_Foreach(&method->lines, lineNode) {
+			LinkedList_Each(&method->lines, lineNode) {
 				rpt(lineNode->indent + 1) {
 					writeSourceString(this, $("\t"));
 				}
@@ -138,7 +138,7 @@ static odef(void, writeSource, Method_List *methods) {
 		writeSourceString(this, this->className.rd);
 		writeSourceString(this, $(" = {\n"));
 
-		LinkedList_Foreach(methods, node) {
+		LinkedList_Each(methods, node) {
 			Method *method = Method_GetObject(node->method);
 
 			if (method->block) {
@@ -183,7 +183,7 @@ static odef(void, writeHeader, Method_List *methods) {
 		writeHeaderString(this, this->className.rd);
 		writeHeaderString(this, $(";"));
 	} else {
-		DoublyLinkedList_ReverseForeach(methods, node) {
+		DoublyLinkedList_ReverseEach(methods, node) {
 			Method *method = Method_GetObject(node->method);
 
 			if (method->lines.first != NULL) {

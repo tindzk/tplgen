@@ -1,10 +1,10 @@
 #import <File.h>
 #import <Array.h>
 #import <Block.h>
-#import <String.h>
 #import <Logger.h>
+#import <Stream.h>
+#import <String.h>
 #import <Directory.h>
-#import <StreamInterface.h>
 
 #import "Method.h"
 #import "Output.h"
