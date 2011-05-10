@@ -21,4 +21,5 @@ mkdir -p Build/Jivai
 	optimlevel=0                    \
 	dbgsym=yes                      \
 	inclhdr=Config.h                \
-	link=@bfd
+	link=@bfd                       \
+	link=@dl

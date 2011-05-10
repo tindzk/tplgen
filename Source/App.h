@@ -10,7 +10,7 @@
 #import "Output.h"
 #import "Parser.h"
 
-#define self Application
+#define self App
 
 // @exc InvalidParameter
 // @exc ParsingFailed
@@ -29,12 +29,13 @@ class {
 	String out;
 	String name;
 
+	Logger *logger;
 	Method_List methods;
 
 	ref(TemplateArray) *files;
 };
 
-rsdef(self, New);
+rsdef(self, New, Logger *logger);
 odef(void, destroy);
 odef(bool, setOption, RdString name, RdString value);
 odef(void, process);

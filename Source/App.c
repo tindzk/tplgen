@@ -1,26 +1,23 @@
-#import "Application.h"
+#import "App.h"
 
-#define self Application
+#define self App
 
-extern Logger logger;
-
-rsdef(self, New) {
+rsdef(self, New, Logger *logger) {
 	return (self) {
 		.itf     = true,
 		.dir     = String_New(0),
 		.ext     = String_New(0),
 		.out     = String_New(0),
 		.name    = String_New(0),
+		.logger  = logger,
 		.files   = scall(TemplateArray_New, 50),
 		.methods = DoublyLinkedList_New()
 	};
 }
 
-odef(void, destroyItem, GenericInstance inst) {
-	Method_Item *item = inst.object;
-
+def(void, destroyItem, Instance inst) {
+	Method_Item *item = inst.addr;
 	Method_Destroy(item->method);
-	Method_Free(item->method);
 }
 
 odef(void, destroy) {
@@ -30,7 +27,7 @@ odef(void, destroy) {
 	String_Destroy(&this->name);
 
 	DoublyLinkedList_Destroy(&this->methods,
-		LinkedList_OnDestroy_For(this, destroyItem));
+		LinkedList_OnDestroy_For(this, ref(destroyItem)));
 
 	each(file, this->files) {
 		String_Destroy(&file->name);
@@ -49,7 +46,7 @@ odef(bool, setOption, RdString name, RdString value) {
 		RdStringArray *parts = String_Split(value, ':');
 
 		if (parts->len < 2) {
-			Logger_Error(&logger,
+			Logger_Error(this->logger,
 				$("`add' requires two values separated by a colon."));
 			RdStringArray_Free(parts);
 			return false;
@@ -169,7 +166,7 @@ static odef(void, handleFor, Method *method, RdString params) {
 	RdStringArray *parts = String_Split(params, ' ');
 
 	if (parts->len < 3) {
-		Logger_Error(&logger, $("Incomplete for-loop."));
+		Logger_Error(this->logger, $("Incomplete for-loop."));
 		throw(ParsingFailed);
 	}
 
@@ -178,7 +175,7 @@ static odef(void, handleFor, Method *method, RdString params) {
 	String from = formatVariables(this, parts->buf[2]);
 
 	if (!String_Equals(option, $("in"))) {
-		Logger_Error(&logger, $("For loops don't support '%'"),
+		Logger_Error(this->logger, $("For loops don't support '%'"),
 			option);
 
 		throw(ParsingFailed);
@@ -252,7 +249,7 @@ static odef(void, handleCommand, Method *method, RdString name, RdString params)
 	} else if (String_Equals(name, $("tpl"))) {
 		handleTemplate(this, method, params);
 	} else {
-		Logger_Error(&logger, $("Command '%' is unknown."), name);
+		Logger_Error(this->logger, $("Command '%' is unknown."), name);
 		throw(ParsingFailed);
 	}
 }
@@ -314,12 +311,9 @@ static odef(void, flushBuf, Method *method, RdString s) {
 }
 
 static odef(Method *, newMethod, String name) {
-	Method *method = Method_Alloc();
-	*method = Method_New(name, this->itf);
+	Method *method = Method_New(name, this->itf);
 
-	Method_Item *item = Method_Item_Alloc();
-
-	item->method = method;
+	Method_Item *item = Method_Item_New(method);
 
 	DoublyLinkedList_InsertEnd(&this->methods, item);
 
@@ -327,15 +321,11 @@ static odef(Method *, newMethod, String name) {
 }
 
 static odef(Method *, newBlockMethod, String name, String params, bool public) {
-	Method *method = Method_Alloc();
-	*method = Method_New(name, !public);
-
+	Method *method = Method_New(name, !public);
 	Method_SetBlock(method, true);
 	Method_SetParameters(method, params);
 
-	Method_Item *item = Method_Item_Alloc();
-
-	item->method = method;
+	Method_Item *item = Method_Item_New(method);
 
 	DoublyLinkedList_InsertEnd(&this->methods, item);
 
@@ -393,7 +383,7 @@ static odef(void, parseTemplate, Parser *parser, bool inBlock, Method *method) {
 						goto out;
 					}
 
-					Logger_Error(&logger,
+					Logger_Error(this->logger,
 						$("'%' not understood."),
 						cur.block.rd);
 
@@ -440,9 +430,9 @@ out:
 }
 
 odef(void, scan) {
-	Directory dir;
 	Directory_Entry item;
-	Directory_Init(&dir, this->dir.rd);
+
+	Directory dir = Directory_New(this->dir.rd);
 
 	while (Directory_Read(&dir, &item)) {
 		if (item.type != Directory_ItemType_Symlink &&
@@ -470,7 +460,7 @@ odef(void, scan) {
 
 odef(void, process) {
 	if (this->out.len == 0) {
-		Logger_Error(&logger, $("No output path is set."));
+		Logger_Error(this->logger, $("No output path is set."));
 		throw(InvalidParameter);
 	}
 
@@ -479,11 +469,11 @@ odef(void, process) {
 	}
 
 	Output output;
-	init(&output, this->out.rd, this->itf);
+	init(&output, this->logger, this->out.rd, this->itf);
 	setClassName(&output, String_Clone(this->name.rd));
 
 	fwd(i, this->files->len) {
-		Logger_Info(&logger, $("Processing %..."),
+		Logger_Info(this->logger, $("Processing %..."),
 			this->files->buf[i].file.rd);
 
 		File tplFile = File_New(this->files->buf[i].file.rd, FileStatus_ReadOnly);
@@ -502,6 +492,6 @@ odef(void, process) {
 		BufferedStream_Destroy(&stream);
 	}
 
-	write(&output, &this->methods);
+	writeList(&output, &this->methods);
 	destroy(&output);
 }

@@ -37,7 +37,7 @@ static def(void, ParseCommand, ref(Token) *token) {
 	String buf = String_New(64);
 
 	while (!delegate(this->stream, isEof)) {
-		delegate(this->stream, read, &cur, 1);
+		delegate(this->stream, read, Buffer_ForChar(&cur));
 
 		if (cur == '}') {
 			break;
@@ -65,7 +65,7 @@ static def(void, ParseBlock, ref(Token) *token) {
 	token->block = String_New(64);
 
 	while (!delegate(this->stream, isEof)) {
-		delegate(this->stream, read, &cur, 1);
+		delegate(this->stream, read, Buffer_ForChar(&cur));
 
 		if (cur == ']') {
 			break;
@@ -91,7 +91,7 @@ def(ref(Token), Fetch) {
 	}
 
 	while (!delegate(this->stream, isEof)) {
-		delegate(this->stream, read, &cur, 1);
+		delegate(this->stream, read, Buffer_ForChar(&cur));
 
 		if ((cur == '{' || cur == '[') && prev != '\\') {
 			if (token.state != ref(State_None)) {

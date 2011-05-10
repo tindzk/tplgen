@@ -1,9 +1,12 @@
+#import <Main.h>
 #import <String.h>
 #import <Terminal.h>
 #import <Exception.h>
 
 #import "Article.h"
 #import "Template.h"
+
+#define self Application
 
 void printListing(String *out, Articles *articles) {
 	ListingTemplate tpl;
@@ -19,7 +22,7 @@ void printArticle(String *out, Article article) {
 	Template_Article(&tpl, out);
 }
 
-int main(__unused int argc, __unused char *argv[]) {
+def(bool, Run) {
 	Articles *articles = Articles_New(4);
 
 	Articles_Push(&articles, Article(0, $("First article")));
@@ -44,5 +47,5 @@ int main(__unused int argc, __unused char *argv[]) {
 	Articles_Free(articles);
 	String_Destroy(&res);
 
-	return ExitStatus_Success;
+	return true;
 }

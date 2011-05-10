@@ -13,8 +13,6 @@ record(ref(LineItem)) {
 	LinkedList_DeclareRef(ref(LineItem));
 };
 
-MemoryHelpers(ref(LineItem));
-
 LinkedList_DeclareList(ref(LineItem), ref(LineList));
 
 class {
@@ -29,21 +27,32 @@ class {
 	ref(LineList) lines;
 };
 
-MemoryHelpers(self);
-
 record(ref(Item)) {
 	Method *method;
 	DoublyLinkedList_DeclareRef(ref(Item));
 };
 
-MemoryHelpers(ref(Item));
+static inline ref(Item)* ref(Item_New)(self *method) {
+	ref(Item) *res = Memory_New(sizeof(ref(Item)));
+	res->method = method;
+	return res;
+}
+
+static inline ref(LineItem)* ref(LineItem_New)(CarrierString line, size_t indent) {
+	ref(LineItem) *res = Memory_New(sizeof(ref(LineItem)));
+
+	res->line   = line;
+	res->indent = indent;
+
+	return res;
+}
 
 DoublyLinkedList_DeclareList(ref(Item), ref(List));
 
-rsdef(self, New, String name, bool hidden);
+rsdef(self *, New, String name, bool hidden);
+def(void, Destroy);
 def(void, SetBlock, bool value);
 def(void, SetParameters, String value);
-def(void, Destroy);
 overload def(void, AddLine, String line);
 overload def(void, AddLine, OmniString line);
 def(void, Indent);

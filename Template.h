@@ -14,8 +14,8 @@ Callback(Template, void, String *);
 		union { struct simpleConcat(name, Template) *addr; } transparentUnion $ptr \
 	) {                                                                            \
 		return (Template) {                                                        \
-			.context = Generic_FromObject($ptr.addr),                              \
-			.cb      = (void *) Template_##name                                    \
+			.context.addr = $ptr.addr,                                             \
+			.cb = (void *) Template_##name                                         \
 		};                                                                         \
 	}                                                                              \
 	record(simpleConcat(name, Template))

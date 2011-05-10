@@ -1,62 +1,37 @@
+#import <Main.h>
 #import <String.h>
 #import <Logger.h>
 #import <Integer.h>
 #import <Terminal.h>
 #import <Exception.h>
 
-#import "Application.h"
+#import "App.h"
 
-Logger logger;
-Terminal term;
+#define self Application
 
-void OnLogMessage(__unused void *ptr, FmtString msg, Logger_Level level, RdString file, int line) {
-	RdString slevel = Logger_ResolveLevel(level);
-	String sline = Integer_ToString(line);
-
-	Terminal_FmtPrint(&term,
-		$("[%] $ (%:%)\n"),
-		slevel, msg, file, sline);
-
-	String_Destroy(&sline);
-}
-
-int main(int argc, char **argv) {
-	term   = Terminal_New(false);
-	logger = Logger_New(Logger_Printer_For(NULL, OnLogMessage));
-
-	if (argc <= 1) {
-		Logger_Error(&logger, $("No parameters specified."));
-		return ExitStatus_Failure;
+def(bool, Run) {
+	if (this->args->len == 0) {
+		Logger_Error(&this->logger, $("No parameters specified."));
+		return false;
 	}
 
-	Application app = Application_New();
+	App app = App_New(&this->logger);
 
-	for (size_t i = 1; i < (size_t) argc; i++) {
-		RdString arg = String_FromNul(argv[i]);
+	fwd(i, this->args->len) {
+		RdString name, value;
 
-		ssize_t pos = String_Find(arg, '=');
-
-		if (pos == String_NotFound) {
-			continue;
-		}
-
-		RdString name  = String_Slice(arg, 0, pos);
-		RdString value = String_Slice(arg, pos + 1);
-
-		if (!setOption(&app, name, value)) {
-			return ExitStatus_Failure;
+		if (String_Parse($("%=%"), this->args->buf[i], &name, &value)) {
+			if (!setOption(&app, name, value)) {
+				return false;
+			}
 		}
 	}
 
 	try {
 		process(&app);
-	} catchAny {
-		Exception_Print(e);
-		excReturn ExitStatus_Failure;
 	} finally {
 		destroy(&app);
-		Terminal_Destroy(&term);
 	} tryEnd;
 
-	return ExitStatus_Success;
+	return true;
 }

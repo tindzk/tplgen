@@ -20,6 +20,8 @@ class {
 	bool itf;
 	String className;
 
+	Logger *logger;
+
 	File srcFile;
 	BufferedStream src;
 
@@ -27,9 +29,9 @@ class {
 	BufferedStream hdr;
 };
 
-odef(void, init, RdString file, bool itf);
+odef(void, init, Logger *logger, RdString file, bool itf);
 odef(void, destroy);
 odef(void, setClassName, String s);
-odef(void, write, Method_List *methods);
+odef(void, writeList, Method_List *methods);
 
 #undef self

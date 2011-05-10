@@ -1,7 +1,5 @@
 #import "Output.h"
 
-extern Logger logger;
-
 #define self Output
 
 static odef(void, open, RdString path, File *file, BufferedStream *stream) {
@@ -14,7 +12,7 @@ static odef(void, open, RdString path, File *file, BufferedStream *stream) {
 		*stream = BufferedStream_New(File_AsStream(file));
 		BufferedStream_SetOutputBuffer(stream, 4096);
 	} catchModule(File) {
-		Logger_Error(&logger,
+		Logger_Error(this->logger,
 			$("Couldn't open file % for writing."),
 			path);
 
@@ -24,8 +22,9 @@ static odef(void, open, RdString path, File *file, BufferedStream *stream) {
 	} tryEnd;
 }
 
-odef(void, init, RdString file, bool itf) {
+odef(void, init, Logger *logger, RdString file, bool itf) {
 	this->itf = itf;
+	this->logger = logger;
 	this->className = String_New(0);
 
 	String src = String_Concat(file, $(".c"));
@@ -49,11 +48,11 @@ odef(void, destroy) {
 }
 
 static odef(void, writeSourceString, RdString s) {
-	BufferedStream_Write(&this->src, s.buf, s.len);
+	BufferedStream_Write(&this->src, String_GetRdBuffer(s));
 }
 
 static odef(void, writeHeaderString, RdString s) {
-	BufferedStream_Write(&this->hdr, s.buf, s.len);
+	BufferedStream_Write(&this->hdr, String_GetRdBuffer(s));
 }
 
 odef(void, setClassName, String s) {
@@ -113,7 +112,7 @@ static odef(void, writeSource, Method_List *methods) {
 	/* Use a reverse loop because declaring blocks' prototypes is
 	 * not compulsory. */
 	DoublyLinkedList_ReverseEach(methods, node) {
-		Method *method = Method_GetObject(node->method);
+		Method *method = node->method;
 
 		/* Omit empty methods. */
 		if (method->lines.first != NULL) {
@@ -139,7 +138,7 @@ static odef(void, writeSource, Method_List *methods) {
 		writeSourceString(this, $(" = {\n"));
 
 		LinkedList_Each(methods, node) {
-			Method *method = Method_GetObject(node->method);
+			Method *method = node->method;
 
 			if (method->block) {
 				continue;
@@ -184,7 +183,7 @@ static odef(void, writeHeader, Method_List *methods) {
 		writeHeaderString(this, $(";"));
 	} else {
 		DoublyLinkedList_ReverseEach(methods, node) {
-			Method *method = Method_GetObject(node->method);
+			Method *method = node->method;
 
 			if (method->lines.first != NULL) {
 				writeDeclaration(this, method, false);
@@ -196,7 +195,7 @@ static odef(void, writeHeader, Method_List *methods) {
 	writeHeaderString(this, $("\n#undef self\n"));
 }
 
-odef(void, write, Method_List *methods) {
+odef(void, writeList, Method_List *methods) {
 	writeHeader(this, methods);
 	writeSource(this, methods);
 }
